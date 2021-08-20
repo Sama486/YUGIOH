@@ -1,0 +1,26 @@
+﻿.memory-grid{
+  display:grid;
+  grid-template-columns: 400px 400px 400px 400px;
+  grid-gap: 20px;
+}
+
+.memory-grid > div {
+  height: 100px;
+  width: 100px; 
+  background: blue;
+  color:white;
+  display: flex;
+  justify-content:center;
+  justify-items:center;
+  font-size: 40px;
+  margin:20px;
+}
+
+  .memory-grid > div.picked{
+    background-color: aqua;
+  }
+
+  .memory-grid > div.found {
+    background: white;
+  }
+

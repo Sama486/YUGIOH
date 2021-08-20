@@ -1,0 +1,78 @@
+﻿<div class="top-row pl-4 navbar navbar-dark">
+  <a class="navbar-brand" href="">YU-GI-OH</a>
+  <button class="navbar-toggler" @onclick="ToggleNavMenu">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+</div>
+
+<AuthorizeView>
+  <Authorized>
+    <div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
+      <ul class="nav flex-column">
+        <li class="nav-item px-3">
+          <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+            <span class="oi oi-home" aria-hidden="true"></span> Home
+          </NavLink>
+        </li>
+        <li class="nav-item px-3">
+          <NavLink class="nav-link" href="counter">
+            <span class="oi oi-plus" aria-hidden="true"></span> Zähler
+          </NavLink>
+        </li>
+        <li class="nav-item px-3">
+          <NavLink class="nav-link" href="Spielen">
+            <span class="oi oi-play-circle" aria-hidden="true"></span> Spielen
+          </NavLink>
+        </li>
+        <li class="nav-item px-3">
+          <NavLink class="nav-link" href="Cardinfo">
+            <span class="oi oi-euro" aria-hidden="true"></span> Verkaufen
+          </NavLink>
+        </li>
+        <li class="nav-item px-3"@onclick="@ToggleNavMenu">
+          <NavLink class="nav-link" href="Cardbuying">
+            <span class="oi oi-magnifying-glass" aria-hidden="true"></span> Suchen
+          </NavLink>
+        </li>
+      </ul>
+    </div>
+  </Authorized>
+  <NotAuthorized>
+    <div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
+      <ul class="nav flex-column">
+        <li class="nav-item px-3">
+          <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+            <span class="oi oi-home" aria-hidden="true"></span> Home
+          </NavLink>
+        </li>
+        <li class="nav-item px-3">
+          <NavLink class="nav-link" href="counter">
+            <span class="oi oi-plus" aria-hidden="true"></span> Zähler
+          </NavLink>
+        </li>
+        <li class="nav-item px-3">
+          <NavLink class="nav-link" href="Spielen">
+            <span class="oi oi-play-circle" aria-hidden="true"></span> Spielen
+          </NavLink>
+        </li>
+        <li class="nav-item px-3">
+          <NavLink class="nav-link" href="Cardbuying">
+            <span class="oi oi-magnifying-glass" aria-hidden="true"></span> Suchen
+          </NavLink>
+        </li>
+      </ul>
+    </div>
+  </NotAuthorized>
+</AuthorizeView>
+
+
+@code {
+  private bool collapseNavMenu = true;
+
+  private string NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+
+  private void ToggleNavMenu()
+  {
+    collapseNavMenu = !collapseNavMenu;
+  }
+}

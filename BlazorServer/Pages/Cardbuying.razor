@@ -1,0 +1,115 @@
+﻿@page "/Cardbuying"
+@using BlazorServer.Data
+@using BlazorServer.Pages
+
+<h1>Gebe den Namen der Karte ein, die du kaufen möchtest</h1>
+<AuthorizeView>
+  <Authorized>
+    <div class="form-group">
+      <input class="form-control" type="text" placeholder="Karte Suchen..."
+             @bind="Suchen"
+             @bind:event="oninput" />
+    </div>
+    <table class="table">
+      <thead class="thead-light">
+        <tr>
+          <th scope="col">Name</th>
+          <th scope="col">Preis. (€)</th>
+          <th scope="col">Editionsnummer</th>
+          <th scope="col">Rarität</th>
+          <th scope="col">Zustand</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        @foreach (var Cardinfo in Cardinfos)
+        {
+          if (!IsVisible(Cardinfo))
+            continue;
+          <tr>
+            <td>@Cardinfo.CardName</td>
+            <td>@Cardinfo.Price</td>
+            <td>@Cardinfo.Editionnumber</td>
+            <td>@Cardinfo.Rarity</td>
+            <td>@Cardinfo.Zustand</td>
+            <td><button class="BtnBuy">Kaufen</button></td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </Authorized>
+  <NotAuthorized>
+    <div class="form-group">
+      <input class="form-control" type="text" placeholder="Karte Suchen..."
+             @bind="Suchen"
+             @bind:event="oninput" />
+    </div>
+    <table class="table">
+      <thead class="thead-light">
+        <tr>
+          <th scope="col">Name</th>
+          <th scope="col">Preis. (€)</th>
+          <th scope="col">Editionsnummer</th>
+          <th scope="col">Rarität</th>
+          <th scope="col">Zustand</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        @foreach (var Cardinfo in Cardinfos)
+        {
+          if (!IsVisible(Cardinfo))
+            continue;
+          <tr>
+            <td>@Cardinfo.CardName</td>
+            <td>@Cardinfo.Price</td>
+            <td>@Cardinfo.Editionnumber</td>
+            <td>@Cardinfo.Rarity</td>
+            <td>@Cardinfo.Zustand</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </NotAuthorized>
+</AuthorizeView>
+
+
+@code{
+  private List<CardinfoItem> Cardinfos = new();
+
+  MongoCRUD db = new MongoCRUD("Yugioh1");
+
+
+  protected override void OnInitialized()
+  {
+
+    var recs = db.LoadRecords<CardinfoItem>("CardsToSell");
+    foreach (var rec in recs)
+    {
+      Cardinfos.Add(new CardinfoItem
+      {
+        Id = rec.Id,
+        Available = rec.Available,
+        CardName = rec.CardName,
+        Price = rec.Price,
+        Editionnumber = rec.Editionnumber,
+        Rarity = rec.Rarity,
+        Zustand = rec.Zustand,
+      });
+    }
+
+  }
+  public string Suchen { get; set; }
+
+  public bool IsVisible(CardinfoItem Cardinfo)
+  {
+
+    if (string.IsNullOrEmpty(Suchen))
+      return true;
+
+    if (Cardinfo.CardName.Contains(Suchen, StringComparison.OrdinalIgnoreCase))
+      return true;
+
+    return false;
+  }
+}

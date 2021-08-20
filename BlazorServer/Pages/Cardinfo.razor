@@ -1,0 +1,180 @@
+﻿@page "/Cardinfo"
+@inject NavigationManager NM
+@inject IJSRuntime JsRuntime
+@inject IHttpContextAccessor httpContextAccessor
+@using Microsoft.AspNetCore.Http
+@using BlazorServer.Data
+@using System.Threading;
+
+<h1>Karten mit denen was gemacht werden soll(@Cardinfos.Count(Cardinfo => Cardinfo.Available))</h1>
+
+<table class="table">
+  <thead class="thead-light">
+    <tr>
+      <th>
+        <p class="grün">Verkaufen</p>
+      </th>
+      <th>
+        <p>Name</p>
+      </th>
+      <th>
+        <p>Preis €</p>
+      </th>
+      <th>
+        <p>Editionsnummer</p>
+      </th>
+      <th>
+        <p>Rarität</p>
+      </th>
+      <th>
+        <p>Zustand</p>
+      </th>
+
+    </tr>
+
+    @foreach (var Cardinfo in Cardinfos)
+    {
+      <tr>
+        <td><input type="checkbox" @bind="Cardinfo.Available" /></td>
+        <td><input readonly @bind="Cardinfo.CardName" /></td>
+        <td><input readonly @bind="Cardinfo.Price" /></td>
+        <td><input readonly @bind="Cardinfo.Editionnumber" /></td>
+        <td><input readonly @bind="Cardinfo.Rarity" /></td>
+        <td><input readonly @bind="Cardinfo.Zustand" /></td>
+        <td><button type="button" class="btndelete" @onclick="@(e => del(Cardinfo.Id))"> Delete </button></td>
+      </tr>
+    }
+
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <p>Eingabe</p>
+      </td>
+      <td>
+        <input placeholder="Card Name" @bind="sNewCard" />
+      </td>
+      <td>
+        <input min="0.00" step="0,01" placeholder="Card price" @bind="fNewPrice" />
+      </td>
+      <td>
+        <input placeholder="Card editionnumber" @bind="sNeweditionnumber" />
+      </td>
+      <td>
+        <select required class="select-box" @bind="sNewrarity">
+          <option value="" disabled selected>Wähle Rarität</option>
+          <option>Common</option>
+          <option>Rare</option>
+          <option>Super Rare</option>
+          <option>Ultra Rare</option>
+          <option>Secret Rare</option>
+          <option>Ultimate Rare</option>
+          <option>Ghost Rare</option>
+          <option>Colored Rare</option>
+          <option>Starfoil</option>
+          <option>Mosaic Rare</option>
+          <option>Shatterfoil</option>
+          <option>Gold Rare</option>
+          <option>Ghost Gold Rare</option>
+          <option>Gold Secret Rare</option>
+          <option>Platinum Rare</option>
+          <option>Platinum Secret Rare</option>
+          <option>Parallel Rare</option>
+        </select>
+      </td>
+      <td>
+        <select required class="select-box" @bind="sNewzustand">
+          <option value="" disabled selected>Wähle Zustand</option>
+          <option>Mint</option>
+          <option>Near Mint</option>
+          <option>Excellent</option>
+          <option>Good</option>
+          <option>Light Played</option>
+          <option>Played</option>
+          <option>Poor</option>
+          <option>Beschädigt</option>
+        </select>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<button class="butt" @onclick="AddCard">Add Card</button>
+
+
+@code {
+  private List<CardinfoItem> Cardinfos = new();
+  private string sNewCard;
+  private float? fNewPrice;
+  private string sNeweditionnumber;
+  private string sNewrarity;
+  private string sNewzustand;
+  public string UserName;     //UserName wird Deklariert
+
+
+  MongoCRUD db = new MongoCRUD("Yugioh1");      //Database wird erstellt
+
+
+
+  protected override void OnInitialized()     //Database Daten werden Hochgeladen und kommen in die Tabelle
+  {
+    UserName = httpContextAccessor.HttpContext.User.Identity.Name;      //UserName wird Initialisiert
+    var recs2 = db.LoadRecords<CardinfoItem>(UserName);
+    var recs = db.LoadRecords<CardinfoItem>("CardsToSell");
+    foreach (var rec in recs)
+    {
+      Cardinfos.Add(new CardinfoItem      //Database Daten kommen in die Liste
+      {
+        Id = rec.Id,
+        Available = rec.Available,
+        CardName = rec.CardName,
+        Price = rec.Price,
+        Editionnumber = rec.Editionnumber,
+        Rarity = rec.Rarity,
+        Zustand = rec.Zustand,
+      });
+    }
+  }
+
+  private void AddCard()      //Karte kommt in die Datenbank und in die Liste per onclick
+  {
+    if (!string.IsNullOrWhiteSpace(sNewCard) && fNewPrice > 0 && fNewPrice != null && !string.IsNullOrWhiteSpace(sNeweditionnumber) && !string.IsNullOrWhiteSpace(sNewrarity) && !string.IsNullOrWhiteSpace(sNewzustand))
+    {
+      float tempNewPrice = fNewPrice.Value;
+
+      string sNewPrice = tempNewPrice.ToString("0.00");
+
+      db.InsertRecord(UserName,  new CardinfoItem { CardName = sNewCard, Available = true, Price = sNewPrice, Editionnumber = sNeweditionnumber, Rarity = sNewrarity, Zustand = sNewzustand, });      //Eintrag in die Datenbank
+      db.InsertRecord("CardsToSell", new CardinfoItem { CardName = sNewCard, Available = true, Price = sNewPrice, Editionnumber = sNeweditionnumber, Rarity = sNewrarity, Zustand = sNewzustand, });  //Eintrag in die Datenbank
+
+      Cardinfos.Add(new CardinfoItem
+      {
+        CardName = sNewCard,
+        Price = tempNewPrice.ToString("0.00"),
+        Editionnumber = sNeweditionnumber,
+        Rarity = sNewrarity,
+        Zustand = sNewzustand
+      });
+      sNewCard = string.Empty;
+      fNewPrice = null;
+      sNeweditionnumber = string.Empty;
+      sNewrarity = string.Empty;
+      sNewzustand = string.Empty;
+    }
+
+    NM.NavigateTo("Cardinfo", true);
+  }
+
+  private void del(Guid nr)
+  {
+    var myRec = db.LoadRecordById<CardinfoItem>(UserName, new Guid(nr.ToByteArray()));      //UserName geht ned bei delete amk
+    db.DeleteRecordById<CardinfoItem>(UserName, myRec.Id);
+
+    var allRec = db.LoadRecordById<CardinfoItem>("CardsToSell", new Guid(nr.ToByteArray()));
+    db.DeleteRecordById<CardinfoItem>("CardsToSell", allRec.Id);
+
+    NM.NavigateTo("Cardinfo", true);
+  }
+
+}
+
+
