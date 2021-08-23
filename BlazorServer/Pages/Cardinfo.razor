@@ -33,7 +33,7 @@
     </tr>
 
     @foreach (var Cardinfo in Cardinfos)
-    {
+        {
       <tr>
         <td><input type="checkbox" @bind="Cardinfo.Available" /></td>
         <td><input readonly @bind="Cardinfo.CardName" /></td>
@@ -43,7 +43,8 @@
         <td><input readonly @bind="Cardinfo.Zustand" /></td>
         <td><button type="button" class="btndelete" @onclick="@(e => del(Cardinfo.Id))"> Delete </button></td>
       </tr>
-    }
+          
+        }
 
   </thead>
   <tbody>
@@ -103,6 +104,7 @@
 
 @code {
   private List<CardinfoItem> Cardinfos = new();
+  private List<CardinfoItem2> Cardinfos2 = new();
   private string sNewCard;
   private float? fNewPrice;
   private string sNeweditionnumber;
@@ -118,8 +120,8 @@
   protected override void OnInitialized()     //Database Daten werden Hochgeladen und kommen in die Tabelle
   {
     UserName = httpContextAccessor.HttpContext.User.Identity.Name;      //UserName wird Initialisiert
-    var recs2 = db.LoadRecords<CardinfoItem>(UserName);
-    var recs = db.LoadRecords<CardinfoItem>("CardsToSell");
+    var recs = db.LoadRecords<CardinfoItem>(UserName);
+
     foreach (var rec in recs)
     {
       Cardinfos.Add(new CardinfoItem      //Database Daten kommen in die Liste
@@ -133,19 +135,18 @@
         Zustand = rec.Zustand,
       });
     }
+    
   }
 
   private void AddCard()      //Karte kommt in die Datenbank und in die Liste per onclick
   {
-    if (!string.IsNullOrWhiteSpace(sNewCard) && fNewPrice > 0 && fNewPrice != null && !string.IsNullOrWhiteSpace(sNeweditionnumber) && !string.IsNullOrWhiteSpace(sNewrarity) && !string.IsNullOrWhiteSpace(sNewzustand))
+    if (!string.IsNullOrWhiteSpace(sNewCard) && fNewPrice > 0 && fNewPrice != null && !string.IsNullOrWhiteSpace(sNeweditionnumber) && !string.IsNullOrWhiteSpace(sNewrarity) && !string.IsNullOrWhiteSpace(sNewzustand)) //In jedem Input muss was stehen
     {
       float tempNewPrice = fNewPrice.Value;
-
       string sNewPrice = tempNewPrice.ToString("0.00");
-
-      db.InsertRecord(UserName,  new CardinfoItem { CardName = sNewCard, Available = true, Price = sNewPrice, Editionnumber = sNeweditionnumber, Rarity = sNewrarity, Zustand = sNewzustand, });      //Eintrag in die Datenbank
-      db.InsertRecord("CardsToSell", new CardinfoItem { CardName = sNewCard, Available = true, Price = sNewPrice, Editionnumber = sNeweditionnumber, Rarity = sNewrarity, Zustand = sNewzustand, });  //Eintrag in die Datenbank
-
+      
+      db.InsertRecord2(UserName, "CardsToSell",  new CardinfoItem { CardName = sNewCard, Available = true, Price = sNewPrice, Editionnumber = sNeweditionnumber, Rarity = sNewrarity, Zustand = sNewzustand, });      //Eintrag in die DatenbankEN
+      
       Cardinfos.Add(new CardinfoItem
       {
         CardName = sNewCard,
@@ -164,17 +165,18 @@
     NM.NavigateTo("Cardinfo", true);
   }
 
-  private void del(Guid nr)
+  private void del(Guid nr) //Karte wird aus der Datenbank entfernt per onklick
   {
-    var myRec = db.LoadRecordById<CardinfoItem>(UserName, new Guid(nr.ToByteArray()));      //UserName geht ned bei delete amk
-    db.DeleteRecordById<CardinfoItem>(UserName, myRec.Id);
 
-    var allRec = db.LoadRecordById<CardinfoItem>("CardsToSell", new Guid(nr.ToByteArray()));
-    db.DeleteRecordById<CardinfoItem>("CardsToSell", allRec.Id);
+    var myRec = db.LoadRecordById<CardinfoItem>(UserName, new Guid(nr.ToByteArray()));
 
-    NM.NavigateTo("Cardinfo", true);
+    db.DeleteRecordById<CardinfoItem>(UserName, myRec.Id);                                            //UserName Eintrag wird deleted
+    db.DeleteRecordById<CardinfoItem2>("CardsToSell", myRec.Id);                                   //CardsToSell Eintrag wird deleted
+
+      NM.NavigateTo("Cardinfo", true);
+
+    }
+
   }
-
-}
 
 

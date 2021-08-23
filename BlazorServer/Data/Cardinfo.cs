@@ -25,6 +25,22 @@ namespace BlazorServer.Data
 
     public string Zustand { get; set; }
   }
+  public class CardinfoItem2
+  {
+    [BsonId]
+    public Guid Id { get; set; }
+    public string CardName { get; set; }
+
+    public bool Available { get; set; }
+
+    public string Price { get; set; }
+
+    public string Editionnumber { get; set; }
+
+    public string Rarity { get; set; }
+
+    public string Zustand { get; set; }
+  }
 
 
   public class MongoCRUD
@@ -42,7 +58,15 @@ namespace BlazorServer.Data
       var collection = db.GetCollection<T>(table);
       collection.InsertOne(record);
     }
-    
+
+    public void InsertRecord2<T>(string table, string table2, T record)   //Insert Record2
+    {
+      var collection = db.GetCollection<T>(table);
+      collection.InsertOne(record);
+      var collection2 = db.GetCollection<T>(table2);
+      collection2.InsertOne(record);
+    }
+
 
     public List<T> LoadRecords<T>(string table)   //Load
     {
