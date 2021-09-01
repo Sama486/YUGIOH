@@ -1,4 +1,7 @@
 ﻿@page "/Cardbuying"
+@inject NavigationManager NM
+@inject IHttpContextAccessor httpContextAccessor
+@using Microsoft.AspNetCore.Http
 @using BlazorServer.Data
 @using BlazorServer.Pages
 
@@ -32,7 +35,7 @@
             <td>@Cardinfo.Editionnumber</td>
             <td>@Cardinfo.Rarity</td>
             <td>@Cardinfo.Zustand</td>
-            <td><button class="BtnBuy">Kaufen</button></td>
+            <td><button @onclick="@(e => buy(Cardinfo.Verkäufer))" class="BtnBuy">Kaufen</button></td>
           </tr>
         }
       </tbody>
@@ -75,13 +78,18 @@
 
 
 @code{
+  public string UserName;
+  public string UserComb;
+
   private List<CardinfoItem> Cardinfos = new();
+  private List<Acteure> Acteures = new();
 
   MongoCRUD db = new MongoCRUD("Yugioh1");
 
 
   protected override void OnInitialized()
   {
+    UserName = httpContextAccessor.HttpContext.User.Identity.Name;      //UserName wird Initialisiert
 
     var recs = db.LoadRecords<CardinfoItem>("CardsToSell");
     foreach (var rec in recs)
@@ -89,6 +97,7 @@
       Cardinfos.Add(new CardinfoItem
       {
         Id = rec.Id,
+        Verkäufer = rec.Verkäufer,
         Available = rec.Available,
         CardName = rec.CardName,
         Price = rec.Price,
@@ -111,5 +120,12 @@
       return true;
 
     return false;
+  }
+
+  private void buy(string _Verkäufer)
+  {
+    string[] Acteures = { _Verkäufer, UserName };
+    UserComb = Acteures[0].ToString() + " sells to " + Acteures[1].ToString();
+    NM.NavigateTo($"Chat2/{_Verkäufer}/{UserComb}");
   }
 }

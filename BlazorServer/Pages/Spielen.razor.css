@@ -6,7 +6,7 @@
 
 .memory-grid > div {
   height: 100px;
-  width: 100px; 
+  width: 100px;
   background: blue;
   color:white;
   display: flex;

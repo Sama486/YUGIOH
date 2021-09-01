@@ -1,0 +1,63 @@
+﻿.Nachrichtenbox {
+  background-color: black;
+  width: 800px;
+  height: 800px;
+  border-radius:18px;
+  position: relative;
+  left:350px;
+  top:100px;
+}
+
+.Nachrichten {
+  background-color: #721e1e;
+  width: 230px;
+  height: 600px;
+  position: relative;
+  left: 570px;
+  border-top-right-radius: 18px;
+}
+
+.Chatinput{
+  width:800px;
+  height:100px;
+  max-height:100px;
+  min-height:100px;
+  background-color:#2f2f2f;
+  color:azure;
+}
+  .Chatinput:focus {
+    outline: none !important;
+    border: 1px solid red;
+  }
+
+.buttn {
+  display: inline-block;
+  padding: 15px 25px;
+  font-size: 24px;
+  cursor: pointer;
+  text-align: center;
+  text-decoration: none;
+  outline: none;
+  color: #fff;
+  background-color: #721e1e;
+  border: none;
+  border-radius: 15px;
+  box-shadow: 0 9px #2f2f2f;
+  position: relative;
+  left: 600px;
+}
+
+  .buttn:hover {
+    background-color: #983232;
+  }
+
+  .buttn:active {
+    background-color: #3e8e41;
+    box-shadow: 0 5px #2f2f2f;
+    transform: translateY(4px);
+  }
+
+  .h1{
+    color:#000000;
+    max-width:570px;
+  }

@@ -1,0 +1,47 @@
+﻿@page "/Chat"
+@using BlazorServer.Data
+@using BlazorServer.Pages
+@inject IHttpContextAccessor httpContextAccessor
+@using Microsoft.AspNetCore.Http
+
+<h1>Chatte mit den Verkäufern</h1>
+<div class="Nachrichtenbox">
+  <div class="Nachrichten">
+    Chats
+  </div>
+  <textarea class="Chatinput" rows="5" />
+  <button class="buttn">Send</button>
+</div>
+
+@code {
+  [Parameter]
+  public string Verkäufer { get; set; }
+  public string UserName;
+
+  private List<CardinfoItem> Cardinfos = new();
+
+  MongoCRUD db = new MongoCRUD("Yugioh1");
+  MongoCRUD dbChat = new MongoCRUD("Chats");
+
+  protected override void OnInitialized()
+  {
+    UserName = httpContextAccessor.HttpContext.User.Identity.Name;      //UserName wird Initialisiert
+
+    var recs = db.LoadRecords<CardinfoItem>("CardsToSell");
+    foreach (var rec in recs)
+    {
+      Cardinfos.Add(new CardinfoItem
+      {
+        Id = rec.Id,
+        Verkäufer = rec.Verkäufer,
+        Available = rec.Available,
+        CardName = rec.CardName,
+        Price = rec.Price,
+        Editionnumber = rec.Editionnumber,
+        Rarity = rec.Rarity,
+        Zustand = rec.Zustand,
+      });
+    }
+  }
+
+}

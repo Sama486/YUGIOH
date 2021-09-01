@@ -1,0 +1,108 @@
+﻿@page "/Chat2/{_Verkäufer}/{UserComb}"
+@using MongoDB.Bson
+@using MongoDB.Bson.Serialization.Attributes
+@using BlazorServer.Data
+@using BlazorServer.Pages
+@inject IHttpContextAccessor httpContextAccessor
+@using Microsoft.AspNetCore.Http
+
+
+<h1>Chatte mit @_Verkäufer</h1>
+<div class="Nachrichtenbox">
+  <div class="NachrichtenScrollBox">
+    @foreach (var rec2 in dbChat.LoadRecords<Chat>(UserComb))
+    {
+      if(rec2.SourceUserName == UserName)
+        { 
+          <div class="Nachrichten" style="display:inline-block" >
+          @rec2.Content
+          </div>
+        }
+        else
+        {
+          <div class="Nachrichten" >
+            @rec2.Content
+          </div>
+        }
+    }
+  </div>
+  <div class="Chats">
+    Chats
+  </div>
+  <textarea class="Chatinput" rows="5" @bind="NewContent" />
+  <button class="buttn" @onclick="Send">Send</button>
+</div>
+
+@code {
+  public string UserName;
+  //public string UserComb;
+  private string NewContent = "";
+
+  [Parameter]
+  public string UserComb { get; set; }
+  [Parameter]
+  public string _Verkäufer { get; set; }
+
+  private List<CardinfoItem> Cardinfos = new();
+  private List<Chat> Chats = new();
+
+  MongoCRUD db = new MongoCRUD("Yugioh1");
+  MongoCRUD dbChat = new MongoCRUD("Chats");
+
+
+
+
+  public class Chat
+  {
+    [BsonId]
+    public Guid Id { get; set; }
+    public string SourceUserName { get; set; }
+    public string TargetUserName { get; set; }
+    public string Content { get; set; }
+    public DateTime SendTime { get; set; }
+  }
+
+  protected override void OnInitialized()
+  {
+    UserName = httpContextAccessor.HttpContext.User.Identity.Name;      //UserName wird Initialisiert
+
+    var recs2 = dbChat.LoadRecords<Chat>(UserComb);
+    foreach (var rec2 in recs2)
+    {
+      Chats.Add(new Chat
+      {
+        SourceUserName = rec2.SourceUserName,
+        TargetUserName = rec2.TargetUserName,
+        Content = rec2.Content,
+        SendTime = rec2.SendTime
+      });
+    }
+
+    var recs = db.LoadRecords<CardinfoItem>("CardsToSell");
+    foreach (var rec in recs)
+    {
+      Cardinfos.Add(new CardinfoItem
+      {
+        Id = rec.Id,
+        Verkäufer = rec.Verkäufer,
+        Available = rec.Available,
+        CardName = rec.CardName,
+        Price = rec.Price,
+        Editionnumber = rec.Editionnumber,
+        Rarity = rec.Rarity,
+        Zustand = rec.Zustand,
+      });
+    }
+  }
+
+  private void Send()
+  {
+    if (!string.IsNullOrWhiteSpace(NewContent))
+    {
+      DateTime timeUtc = DateTime.UtcNow;
+
+      dbChat.InsertRecord(UserComb, new Chat { SourceUserName = UserName, TargetUserName = _Verkäufer, Content = NewContent, SendTime = timeUtc });
+      NewContent = string.Empty;
+    }
+  }
+}

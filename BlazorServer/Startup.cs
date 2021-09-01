@@ -40,6 +40,7 @@ namespace BlazorServer
       services.AddServerSideBlazor();
       services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<IdentityUser>>();
       services.AddDatabaseDeveloperPageExceptionFilter();
+      services.AddSignalR();
       services.AddHttpContextAccessor();
     }
 

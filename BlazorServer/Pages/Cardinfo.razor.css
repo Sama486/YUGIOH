@@ -12,18 +12,18 @@
   text-decoration: none;
   outline: none;
   color: #fff;
-  background-color: #721e1e !important;
+  background-color: #721e1e ;
   border: none;
   border-radius: 15px;
   box-shadow: 0 9px #999;
 }
 
   .butt:hover {
-    background-color: #983232;
+    background-color: #8b2222;
   }
 
   .butt:active {
-    background-color: #3e8e41;
+    background-color: #000000;
     box-shadow: 0 5px #666;
     transform: translateY(4px);
   }
@@ -36,7 +36,7 @@
   text-decoration: none;
   outline: none;
   color: #fff;
-  background-color: #ff0000 !important;
+  background-color: #ff0000 ;
   border: none;
   border-radius: 15px;
   box-shadow: 0 5px #999;
@@ -48,7 +48,7 @@
   }
 
   .btndelete:active {
-    background-color: #3e8e41;
+    background-color: #ff0000;
     box-shadow: 0 5px #666;
     transform: translateY(2px);
   }

@@ -13,6 +13,8 @@ namespace BlazorServer.Data
   {
     [BsonId]
     public Guid Id { get; set; }
+
+    public string Verkäufer { get; set; }
     public string CardName { get; set; }
 
     public bool Available { get; set; }
@@ -25,24 +27,13 @@ namespace BlazorServer.Data
 
     public string Zustand { get; set; }
   }
-  public class CardinfoItem2
+
+  
+  public class Acteure
   {
-    [BsonId]
-    public Guid Id { get; set; }
-    public string CardName { get; set; }
-
-    public bool Available { get; set; }
-
-    public string Price { get; set; }
-
-    public string Editionnumber { get; set; }
-
-    public string Rarity { get; set; }
-
-    public string Zustand { get; set; }
+    public string Käufer { get; set; }
+    public string Verkäufer { get; set; }
   }
-
-
   public class MongoCRUD
   {
     private IMongoDatabase db;
@@ -59,7 +50,7 @@ namespace BlazorServer.Data
       collection.InsertOne(record);
     }
 
-    public void InsertRecord2<T>(string table, string table2, T record)   //Insert Record2
+    public void InsertRecord2<T>(string table, string table2, T record)   //Insert 2 records in 2 databases
     {
       var collection = db.GetCollection<T>(table);
       collection.InsertOne(record);

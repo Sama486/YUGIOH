@@ -1,7 +1,10 @@
 ﻿@page "/"
 
-<h1>Hello, world!</h1>
+<h1>Hello, Yugioh Fans!</h1>
 
-Welcome to your new app.
+<AuthorizeView>
+  <Authorized>
+    <h1>hello, @context.User.Claims.First().Value</h1>
+  </Authorized>
+</AuthorizeView>
 
-<SurveyPrompt Title="How is Blazor working for you?" />
