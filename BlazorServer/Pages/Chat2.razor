@@ -9,20 +9,25 @@
 
 <h1>Chatte mit @_Verkäufer</h1>
 <div class="Nachrichtenbox">
+
   <div class="NachrichtenScrollBox">
     @foreach (var rec2 in dbChat.LoadRecords<Chat>(UserComb))
     {
       if(rec2.SourceUserName == UserName)
         { 
-          <div class="Nachrichten" style="display:inline-block" >
-          @rec2.Content
+        <div style="width:100%">
+          <div class="Nachrichten" style="float:right;clear:right">
+            @rec2.Content
           </div>
+        </div>
         }
         else
         {
-          <div class="Nachrichten" >
+        <div>
+          <div class="Nachrichten">
             @rec2.Content
           </div>
+        </div>
         }
     }
   </div>
@@ -35,7 +40,6 @@
 
 @code {
   public string UserName;
-  //public string UserComb;
   private string NewContent = "";
 
   [Parameter]
