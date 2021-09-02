@@ -1,10 +1,11 @@
 ﻿@page "/Chat2/{_Verkäufer}/{UserComb}"
+@using BlazorServer.Data
 @using MongoDB.Bson
 @using MongoDB.Bson.Serialization.Attributes
-@using BlazorServer.Data
 @using BlazorServer.Pages
 @inject IHttpContextAccessor httpContextAccessor
 @using Microsoft.AspNetCore.Http
+
 
 
 <h1>Chatte mit @_Verkäufer</h1>
@@ -13,22 +14,22 @@
   <div class="NachrichtenScrollBox">
     @foreach (var rec2 in dbChat.LoadRecords<Chat>(UserComb))
     {
-      if(rec2.SourceUserName == UserName)
-        { 
+      if (rec2.SourceUserName == UserName)
+      {
         <div style="width:100%">
           <div class="Nachrichten" style="float:right;clear:right">
             @rec2.Content
           </div>
         </div>
-        }
-        else
-        {
+      }
+      else
+      {
         <div>
           <div class="Nachrichten">
             @rec2.Content
           </div>
         </div>
-        }
+      }
     }
   </div>
   <div class="Chats">
@@ -56,15 +57,7 @@
 
 
 
-  public class Chat
-  {
-    [BsonId]
-    public Guid Id { get; set; }
-    public string SourceUserName { get; set; }
-    public string TargetUserName { get; set; }
-    public string Content { get; set; }
-    public DateTime SendTime { get; set; }
-  }
+
 
   protected override void OnInitialized()
   {

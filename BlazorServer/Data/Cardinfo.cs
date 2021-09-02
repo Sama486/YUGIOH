@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace BlazorServer.Data
 {
-
+  
   public class CardinfoItem
   {
     [BsonId]
@@ -28,7 +28,17 @@ namespace BlazorServer.Data
     public string Zustand { get; set; }
   }
 
-  
+  public class Chat
+  {
+    [BsonId]
+    public Guid Id { get; set; }
+    public string SourceUserName { get; set; }
+    public string TargetUserName { get; set; }
+    public string Content { get; set; }
+    public DateTime SendTime { get; set; }
+  }
+
+
   public class Acteure
   {
     public string Käufer { get; set; }
