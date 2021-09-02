@@ -38,6 +38,7 @@ namespace BlazorServer.Data
   {
     private IMongoDatabase db;
 
+    
     public MongoCRUD(string database)   //Connecting to MongoDB
     {
       var client = new MongoClient();
@@ -91,6 +92,8 @@ namespace BlazorServer.Data
       var filter = Builders<T>.Filter.Eq("Id", id);
       collection.DeleteOne(filter);
     }
+    
   }
+  
 }
 

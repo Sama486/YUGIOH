@@ -22,7 +22,11 @@
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="5.0.9" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="5.0.9" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="5.0.9" />
+    <PackageReference Include="mongocsharpdriver" Version="2.13.1" />
     <PackageReference Include="MongoDB.Driver" Version="2.13.1" />
+    <PackageReference Include="MongoDB.Driver.Core" Version="2.13.1" />
+    <PackageReference Include="MongoDB.Driver.GridFS" Version="2.13.1" />
+    <PackageReference Include="MongoDB.Thin" Version="1.0.0" />
     <PackageReference Include="MudBlazor" Version="5.1.2" />
   </ItemGroup>
 

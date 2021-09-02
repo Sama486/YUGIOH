@@ -2,30 +2,56 @@
   background-color: black;
   width: 800px;
   height: 800px;
-  border-radius:18px;
-  position: relative;
-  left:350px;
-  top:100px;
+  border-radius: 18px;
+  position: absolute;
+  left: 30%;
+  top: 20%;
+}
+
+.NachrichtenScrollBox {
+  background-color: aliceblue;
+  width: 500px;
+  height: 550px;
+  position: absolute;
+  left: 35px;
+  top: 25px;
+  overflow: auto;
+  border-radius: 10px;
 }
 
 .Nachrichten {
+  background-color: blueviolet;
+  padding: 20px;
+  margin: 20px;
+  max-width: 240px;
+  position: center;
+}
+
+.Chats {
   background-color: #721e1e;
   width: 230px;
   height: 600px;
-  position: relative;
+  position: absolute;
   left: 570px;
   border-top-right-radius: 18px;
-  
+}
+.SingleChat {
+  background-color: #721e1e;
+  width:230px;
+  height:100px;
+  border: 1px solid;
+}
+.Chatinput {
+  width: 800px;
+  height: 100px;
+  max-height: 100px;
+  min-height: 100px;
+  background-color: #2f2f2f;
+  color: azure;
+  position: absolute;
+  top: 600px;
 }
 
-.Chatinput{
-  width:800px;
-  height:100px;
-  max-height:100px;
-  min-height:100px;
-  background-color:#2f2f2f;
-  color:azure;
-}
   .Chatinput:focus {
     outline: none !important;
     border: 1px solid red;
@@ -44,8 +70,9 @@
   border: none;
   border-radius: 15px;
   box-shadow: 0 9px #2f2f2f;
-  position: relative;
+  position: absolute;
   left: 600px;
+  top: 710px;
 }
 
   .buttn:hover {
@@ -58,7 +85,7 @@
     transform: translateY(4px);
   }
 
-  .h1{
-    color:#000000;
-    max-width:570px;
-  }
+.h1 {
+  color: #000000;
+  max-width: 570px;
+}
