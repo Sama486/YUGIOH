@@ -1,31 +1,35 @@
-﻿@page "/Chat2/{_Verkäufer}/{UserComb}"
+﻿@page "/Chat2/{col}"
 @using BlazorServer.Data
+@using MongoDB.Driver
 @using MongoDB.Bson
 @using MongoDB.Bson.Serialization.Attributes
-@using BlazorServer.Pages
-@inject IHttpContextAccessor httpContextAccessor
+@using BlazorServer
 @using Microsoft.AspNetCore.Http
 
 
+@inject IHttpContextAccessor httpContextAccessor
+@inject NavigationManager NM
 
-<h1>Chatte mit @_Verkäufer</h1>
+
+
+<h1>Chatte mit @col</h1>
 <div class="Nachrichtenbox">
 
   <div class="NachrichtenScrollBox">
-    @foreach (var rec2 in dbChat.LoadRecords<Chat>(UserComb))
+    @foreach (var rec2 in dbChat.LoadRecords<Chatten>(col))       //Der angeklickte Chat wird geladen
     {
       if (rec2.SourceUserName == UserName)
       {
         <div style="width:100%">
-          <div class="Nachrichten" style="float:right;clear:right">
+          <div class="Nachrichten" style="float:right;clear:right ; margin-left:55%">
             @rec2.Content
           </div>
         </div>
       }
-      else
+      if (rec2.TargetUserName == UserName)
       {
-        <div>
-          <div class="Nachrichten">
+        <div style="width:100% ">
+          <div class="Nachrichten" style="float:left;clear:left ; margin-right:55%">
             @rec2.Content
           </div>
         </div>
@@ -33,47 +37,54 @@
     }
   </div>
   <div class="Chats">
-    Chats
+
+    @foreach (string col in CollectionNames)                              //Die collections bzw chats in den der User was verloren hat, werden geladen.
+    {
+      if (col.EndsWith(UserName))                                        //Ich bin Käufer
+      {
+        Trimmed = col.Split(' ')[0].Trim();
+
+        <div class="SingleChat" @onclick="@(e => SingleChatClick(col))">
+          @col;
+        </div>
+      }
+      if (col.StartsWith(UserName))                                        //Ich bin VERäufer
+      {
+        Trimmed = col.Split(' ')[3].Trim();
+        <div class="SingleChat" @onclick="@(e => SingleChatClick(col))">
+          @col;
+        </div>
+      }
+    }
+
+
   </div>
-  <textarea class="Chatinput" rows="5" @bind="NewContent" />
+  <textarea class="Chatinput" rows="5" @onkeypress="@SendWithEnter" @bind="NewContent" />
   <button class="buttn" @onclick="Send">Send</button>
 </div>
 
 @code {
+
   public string UserName;
+  public string Trimmed;
   private string NewContent = "";
 
   [Parameter]
-  public string UserComb { get; set; }
-  [Parameter]
-  public string _Verkäufer { get; set; }
+  public string col { get; set; }
 
   private List<CardinfoItem> Cardinfos = new();
-  private List<Chat> Chats = new();
+  private List<Chatten> Chats = new();
+  private List<string> CollectionNames = new();
+
+
 
   MongoCRUD db = new MongoCRUD("Yugioh1");
   MongoCRUD dbChat = new MongoCRUD("Chats");
 
 
-
-
-
-
   protected override void OnInitialized()
   {
     UserName = httpContextAccessor.HttpContext.User.Identity.Name;      //UserName wird Initialisiert
-
-    var recs2 = dbChat.LoadRecords<Chat>(UserComb);
-    foreach (var rec2 in recs2)
-    {
-      Chats.Add(new Chat
-      {
-        SourceUserName = rec2.SourceUserName,
-        TargetUserName = rec2.TargetUserName,
-        Content = rec2.Content,
-        SendTime = rec2.SendTime
-      });
-    }
 
     var recs = db.LoadRecords<CardinfoItem>("CardsToSell");
     foreach (var rec in recs)
@@ -90,6 +101,30 @@
         Zustand = rec.Zustand,
       });
     }
+
+    var recs2 = dbChat.LoadRecords<Chatten>(col);
+    foreach (var rec2 in recs2)
+    {
+      Chats.Add(new Chatten
+      {
+        SourceUserName = rec2.SourceUserName,
+        TargetUserName = rec2.TargetUserName,
+        Content = rec2.Content,
+        SendTime = rec2.SendTime
+      });
+    }
+
+    var client = new MongoClient("mongodb://localhost/");   //Host und Port
+
+    var server = client.GetServer();
+    var database = server.GetDatabase("Chats");
+    foreach (var coll in database.GetCollectionNames())     //Collections werden durchsucht
+    {
+      if (coll.Contains(UserName))                          //Wenn Collection den Username beinhaltet, kommt der Chat in die Liste CollectionNames
+      {
+        CollectionNames.Add(coll);
+      }
+    }
   }
 
   private void Send()
@@ -98,8 +133,21 @@
     {
       DateTime timeUtc = DateTime.UtcNow;
 
-      dbChat.InsertRecord(UserComb, new Chat { SourceUserName = UserName, TargetUserName = _Verkäufer, Content = NewContent, SendTime = timeUtc });
+      dbChat.InsertRecord(col, new Chatten { SourceUserName = UserName, TargetUserName = Trimmed, Content = NewContent, SendTime = timeUtc });
       NewContent = string.Empty;
     }
+  }
+
+  public void SendWithEnter(KeyboardEventArgs e)
+  {
+    if (e.Code == "Enter" || e.Code == "NumpadEnter")
+    {
+      Send();
+    }
+  }
+
+  private void SingleChatClick(string col)         //Click Event um zum Chat zu Gelangen
+  {
+    NM.NavigateTo($"Chat2/{col}");
   }
 }

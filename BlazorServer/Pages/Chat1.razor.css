@@ -7,7 +7,6 @@
   left: 30%;
   top: 20%;
 }
-
 .NachrichtenScrollBox {
   background-color: aliceblue;
   width: 500px;
@@ -18,7 +17,6 @@
   overflow: auto;
   border-radius: 10px;
 }
-
 .Nachrichten {
   background-color: blueviolet;
   padding: 20px;
@@ -26,7 +24,6 @@
   max-width: 240px;
   position: center;
 }
-
 .Chats {
   background-color: #721e1e;
   width: 230px;
@@ -34,6 +31,7 @@
   position: absolute;
   left: 570px;
   border-top-right-radius: 18px;
+  overflow: auto;
 }
 .SingleChat {
   background-color: #721e1e;

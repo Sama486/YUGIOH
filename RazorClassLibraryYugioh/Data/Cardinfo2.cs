@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace BlazorServer.Data
 {
-  
+
   public class CardinfoItem
   {
     [BsonId]
@@ -28,8 +28,7 @@ namespace BlazorServer.Data
     public string Zustand { get; set; }
   }
 
-
-  public class Chatten
+  public class Chat
   {
     [BsonId]
     public Guid Id { get; set; }
@@ -38,6 +37,7 @@ namespace BlazorServer.Data
     public string Content { get; set; }
     public DateTime SendTime { get; set; }
   }
+
 
   public class Acteure
   {
@@ -48,7 +48,7 @@ namespace BlazorServer.Data
   {
     private IMongoDatabase db;
 
-    
+
     public MongoCRUD(string database)   //Connecting to MongoDB
     {
       var client = new MongoClient();
@@ -102,8 +102,8 @@ namespace BlazorServer.Data
       var filter = Builders<T>.Filter.Eq("Id", id);
       collection.DeleteOne(filter);
     }
-    
+
   }
-  
+
 }
 

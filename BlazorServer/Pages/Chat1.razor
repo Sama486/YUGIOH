@@ -1,0 +1,94 @@
+﻿@page "/Chat"
+@using MongoDB.Driver
+@using MongoDB.Bson
+@using MongoDB.Bson.Serialization.Attributes
+@using BlazorServer.Data
+
+ 
+@inject IHttpContextAccessor httpContextAccessor
+@inject NavigationManager NM
+@using Microsoft.AspNetCore.Http
+ 
+
+<h1>Chatte mit den Verkäufern @CollectionNames.First();</h1>
+
+<div class="Nachrichtenbox">
+  <div class="NachrichtenScrollBox">
+    
+  </div>
+  <div class="Chats">
+    @foreach(string col in CollectionNames)
+    {
+      if (col.EndsWith(UserName))                                        //Ich bin Käufer
+      { 
+      Trimmed = col.Split(' ')[0].Trim();
+
+        <div class="SingleChat" @onclick="@(e => SingleChatClick(col))">
+          @col;
+        </div>
+      }
+      if (col.StartsWith(UserName))                                        //Ich bin VERäufer
+      {
+        Trimmed = col.Split(' ')[3].Trim();
+        <div class="SingleChat" @onclick="@(e => SingleChatClick(col))">
+          @col;
+        </div>
+      }
+    }
+  </div>
+  <textarea class="Chatinput" rows="5" @bind="NewContent" />
+  <button class="buttn" >Send</button>
+</div>
+
+
+@code {
+
+  public string UserName;
+  public string UserComb;
+  public string Trimmed;
+  private string NewContent = "";
+
+  private List<CardinfoItem> Cardinfos = new();
+  private List<Chatten> Chats = new();
+  private List<string> CollectionNames = new();
+
+  MongoCRUD db = new MongoCRUD("Yugioh1");
+  MongoCRUD dbChat = new MongoCRUD("Chats");
+
+  protected override void OnInitialized()
+  {
+    UserName = httpContextAccessor.HttpContext.User.Identity.Name;      //UserName wird Initialisiert
+
+    var recs = db.LoadRecords<CardinfoItem>("CardsToSell");
+    foreach (var rec in recs)
+    {
+      Cardinfos.Add(new CardinfoItem
+      {
+        Id = rec.Id,
+        Verkäufer = rec.Verkäufer,
+        Available = rec.Available,
+        CardName = rec.CardName,
+        Price = rec.Price,
+        Editionnumber = rec.Editionnumber,
+        Rarity = rec.Rarity,
+        Zustand = rec.Zustand,
+      });
+    }
+
+    var client = new MongoClient("mongodb://localhost/");   //Mongoclient wird initialisiert
+
+    var server = client.GetServer();                        //server wird initialisiert
+    var database = server.GetDatabase("Chats");
+    foreach (var coll in database.GetCollectionNames())     //Collections werden durchsucht
+    {
+      if (coll.Contains(UserName))                          //Wenn Collection den Username beinhaltet, kommt der Chat in die Liste CollectionNames
+      {
+        CollectionNames.Add(coll);
+      }
+    }
+  }
+  private void SingleChatClick(string col)         //Click Event um zum Chat zu Gelangen. Die jeweilige Collection ist in der col Variable
+  {
+    NM.NavigateTo($"Chat2/{col}");                 
+  }
+}

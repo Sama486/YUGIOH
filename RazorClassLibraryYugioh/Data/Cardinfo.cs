@@ -28,8 +28,7 @@ namespace BlazorServer.Data
     public string Zustand { get; set; }
   }
 
-
-  public class Chatten
+  public class Chat
   {
     [BsonId]
     public Guid Id { get; set; }
@@ -38,6 +37,7 @@ namespace BlazorServer.Data
     public string Content { get; set; }
     public DateTime SendTime { get; set; }
   }
+
 
   public class Acteure
   {

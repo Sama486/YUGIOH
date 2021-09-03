@@ -82,7 +82,7 @@
   public string UserComb;
 
   private List<CardinfoItem> Cardinfos = new();
-  private List<Acteure> Acteures = new();
+  //private List<Acteure> Acteures = new();
 
   MongoCRUD db = new MongoCRUD("Yugioh1");
 
@@ -123,8 +123,15 @@
 
   private void buy(string _Verkäufer)
   {
-    string[] Acteures = { _Verkäufer, UserName };
-    UserComb = Acteures[0].ToString() + " sells to " + Acteures[1].ToString();
-    NM.NavigateTo($"Chat2/{_Verkäufer}/{UserComb}");
+    if (_Verkäufer == UserName)
+    {
+
+    }
+    else
+    {
+      string[] Acteures = { _Verkäufer, UserName };
+      UserComb = Acteures[0].ToString() + " sells to " + Acteures[1].ToString();
+      NM.NavigateTo($"Chat2/{_Verkäufer}/{UserComb}");
+    }
   }
 }
