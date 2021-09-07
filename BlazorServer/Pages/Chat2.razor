@@ -6,15 +6,13 @@
 @using BlazorServer
 @using Microsoft.AspNetCore.Http
 
-
 @inject IHttpContextAccessor httpContextAccessor
 @inject NavigationManager NM
 
 
 
-<h1>Chatte mit @col</h1>
+<h1>Chatte mit @col.Split(' ')[0].Trim()</h1>
 <div class="Nachrichtenbox">
-
   <div class="NachrichtenScrollBox">
     @foreach (var rec2 in dbChat.LoadRecords<Chatten>(col))       //Der angeklickte Chat wird geladen
     {
@@ -37,45 +35,44 @@
     }
   </div>
   <div class="Chats">
-
     @foreach (string col in CollectionNames)                              //Die collections bzw chats in den der User was verloren hat, werden geladen.
     {
       if (col.EndsWith(UserName))                                        //Ich bin Käufer
       {
         Trimmed = col.Split(' ')[0].Trim();
 
-        <div class="SingleChat" @onclick="@(e => SingleChatClick(col))">
-          @col;
+        <div class="SingleChat" @onclick="@(e => SingleChatClick(col))" @oncontextmenu="((e) => ContextMenu.ShowAsync(e))" @oncontextmenu:preventDefault>
+          <p>@Trimmed</p>
+
         </div>
-      }
-      if (col.StartsWith(UserName))                                        //Ich bin VERäufer
-      {
-        Trimmed = col.Split(' ')[3].Trim();
-        <div class="SingleChat" @onclick="@(e => SingleChatClick(col))">
-          @col;
-        </div>
+        <DxContextMenu @ref="@ContextMenu" ItemClick="@(e => DeleteChat(col))">
+          <Items>
+            <DxContextMenuItem Text="Delete"></DxContextMenuItem>
+          </Items>
+        </DxContextMenu>
       }
     }
-
-
   </div>
-  <textarea class="Chatinput" rows="5" @onkeypress="@SendWithEnter" @bind="NewContent" />
+  <input class="Chatinput" rows="5" @bind="NewContent" @onkeyup="@SendWithEnter" />
   <button class="buttn" @onclick="Send">Send</button>
 </div>
 
 @code {
+  DxContextMenu ContextMenu { get; set; }
+
 
   public string UserName;
   public string Trimmed;
+  public string col2;
   private string NewContent = "";
 
   [Parameter]
   public string col { get; set; }
 
+
   private List<CardinfoItem> Cardinfos = new();
   private List<Chatten> Chats = new();
   private List<string> CollectionNames = new();
-
 
 
   MongoCRUD db = new MongoCRUD("Yugioh1");
@@ -85,6 +82,8 @@
   protected override void OnInitialized()
   {
     UserName = httpContextAccessor.HttpContext.User.Identity.Name;      //UserName wird Initialisiert
+
+    col2 = col.Split(' ')[1].Trim() + " " + col.Split(' ')[0].Trim();
 
     var recs = db.LoadRecords<CardinfoItem>("CardsToSell");
     foreach (var rec in recs)
@@ -133,12 +132,13 @@
     {
       DateTime timeUtc = DateTime.UtcNow;
 
-      dbChat.InsertRecord(col, new Chatten { SourceUserName = UserName, TargetUserName = Trimmed, Content = NewContent, SendTime = timeUtc });
+      dbChat.InsertRecord2(col, col2, new Chatten { SourceUserName = UserName, TargetUserName = col.Split(' ')[0].Trim(), Content = NewContent, SendTime = timeUtc });
       NewContent = string.Empty;
     }
   }
 
-  public void SendWithEnter(KeyboardEventArgs e)
+
+  protected void SendWithEnter(KeyboardEventArgs e)
   {
     if (e.Code == "Enter" || e.Code == "NumpadEnter")
     {
@@ -149,5 +149,10 @@
   private void SingleChatClick(string col)         //Click Event um zum Chat zu Gelangen
   {
     NM.NavigateTo($"Chat2/{col}");
+  }
+
+  private void DeleteChat(string col)
+  {
+    dbChat.DeleteCollection<Chatten>(col);
   }
 }

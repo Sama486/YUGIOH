@@ -80,6 +80,7 @@
 @code{
   public string UserName;
   public string UserComb;
+  public string col;
 
   private List<CardinfoItem> Cardinfos = new();
   //private List<Acteure> Acteures = new();
@@ -129,9 +130,13 @@
     }
     else
     {
-      string[] Acteures = { _Verkäufer, UserName };
-      UserComb = Acteures[0].ToString() + " sells to " + Acteures[1].ToString();
-      NM.NavigateTo($"Chat2/{_Verkäufer}/{UserComb}");
+      //string[] Acteures = { _Verkäufer, UserName };
+      //UserComb = Acteures[0].ToString() + " sells to " + Acteures[1].ToString();
+      //NM.NavigateTo($"Chat2/{_Verkäufer}/{UserComb}");
+
+      col = _Verkäufer + " " + UserName;
+      NM.NavigateTo($"Chat2/{col}");
+
     }
   }
 }

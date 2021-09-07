@@ -10,7 +10,9 @@
 @using Microsoft.AspNetCore.Http
  
 
-<h1>Chatte mit den Verkäufern @CollectionNames.First();</h1>
+  <h1>Chatte mit den anderen Yugioh Fans @verändern;</h1>
+
+
 
 <div class="Nachrichtenbox">
   <div class="NachrichtenScrollBox">
@@ -23,26 +25,26 @@
       { 
       Trimmed = col.Split(' ')[0].Trim();
 
-        <div class="SingleChat" @onclick="@(e => SingleChatClick(col))">
-          @col;
+        <div class="SingleChat" @onclick="@(e => SingleChatClick(col))" @oncontextmenu="((e) => ContextMenu.ShowAsync(e))" @oncontextmenu:preventDefault>
+          <p>@Trimmed</p>
+
         </div>
-      }
-      if (col.StartsWith(UserName))                                        //Ich bin VERäufer
-      {
-        Trimmed = col.Split(' ')[3].Trim();
-        <div class="SingleChat" @onclick="@(e => SingleChatClick(col))">
-          @col;
-        </div>
+        <DxContextMenu @ref="@ContextMenu" ItemClick="@(e => DeleteChat(col))">
+          <Items>
+            <DxContextMenuItem Text="Delete"></DxContextMenuItem>
+          </Items>
+        </DxContextMenu>
       }
     }
   </div>
-  <textarea class="Chatinput" rows="5" @bind="NewContent" />
-  <button class="buttn" >Send</button>
+  <input class="Chatinput" rows="5" @bind="NewContent" />
+  <button class="buttn">Send</button>
 </div>
 
-
 @code {
+  DxContextMenu ContextMenu { get; set; }
 
+  public string verändern = "kk";
   public string UserName;
   public string UserComb;
   public string Trimmed;
@@ -87,8 +89,17 @@
       }
     }
   }
+
   private void SingleChatClick(string col)         //Click Event um zum Chat zu Gelangen. Die jeweilige Collection ist in der col Variable
   {
-    NM.NavigateTo($"Chat2/{col}");                 
+    NM.NavigateTo($"Chat2/{col}");
   }
+
+  private void DeleteChat(string col)
+  {
+    dbChat.DeleteCollection<Chatten>(col);
+    NM.NavigateTo(NM.Uri, forceLoad: true);
+  }
+
+
 }

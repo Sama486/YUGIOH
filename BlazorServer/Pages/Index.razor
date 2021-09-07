@@ -1,7 +1,7 @@
 ﻿@page "/"
 
 <h1>Hello, Yugioh Fans!</h1>
-
+<DxDateEdit Date="DateTime.Today"></DxDateEdit>
 <AuthorizeView>
   <Authorized>
     <h1>hello, @context.User.Claims.First().Value</h1>

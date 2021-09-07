@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using BlazorServer.Pages;
 
 namespace BlazorServer.Data
 {
@@ -103,6 +104,10 @@ namespace BlazorServer.Data
       collection.DeleteOne(filter);
     }
     
+    public void DeleteCollection<T>( string col )
+    {
+      db.DropCollection(col);
+    }
   }
   
 }

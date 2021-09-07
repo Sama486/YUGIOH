@@ -16,6 +16,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Blazor.ContextMenu" Version="1.10.0" />
+    <PackageReference Include="DevExpress.Blazor" Version="21.1.5" />
+    <PackageReference Include="DevExpress.Data" Version="21.1.5" />
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="5.0.9" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="5.0.9" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="5.0.9" />
@@ -27,7 +30,6 @@
     <PackageReference Include="MongoDB.Driver.Core" Version="2.13.1" />
     <PackageReference Include="MongoDB.Driver.GridFS" Version="2.13.1" />
     <PackageReference Include="MongoDB.Thin" Version="1.0.0" />
-    <PackageReference Include="MudBlazor" Version="5.1.2" />
   </ItemGroup>
 
 </Project>

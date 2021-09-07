@@ -34,6 +34,7 @@
   position: absolute;
   left: 570px;
   border-top-right-radius: 18px;
+  overflow:auto;
 }
 
 .SingleChat {
@@ -41,7 +42,13 @@
   width: 230px;
   height: 100px;
   border: 1px solid;
+  cursor: pointer;
 }
+
+  .SingleChat p {
+    font-size: large;
+    text-align: center
+  }
 
 .Chatinput {
   width: 800px;
@@ -91,3 +98,27 @@
   color: #000000;
   max-width: 570px;
 }
+.btndelete {
+  display: inline-block;
+  font-size: 15px;
+  cursor: pointer;
+  text-align: center;
+  text-decoration: none;
+  outline: none;
+  color: #fff;
+  background-color: #ff0000;
+  border: none;
+  border-radius: 15px;
+  box-shadow: 0 5px #999;
+  height: 30px;
+}
+
+  .btndelete:hover {
+    background-color: #ff0000;
+  }
+
+  .btndelete:active {
+    background-color: #ff0000;
+    box-shadow: 0 5px #666;
+    transform: translateY(2px);
+  }
