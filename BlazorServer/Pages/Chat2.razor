@@ -5,34 +5,46 @@
 @using MongoDB.Bson.Serialization.Attributes
 @using BlazorServer
 @using Microsoft.AspNetCore.Http
+@using Microsoft.AspNetCore.SignalR.Client
+
+
 
 @inject IHttpContextAccessor httpContextAccessor
 @inject NavigationManager NM
 
 
-
 <h1>Chatte mit @col.Split(' ')[0].Trim()</h1>
 <div class="Nachrichtenbox">
   <div class="NachrichtenScrollBox">
-    @foreach (var rec2 in dbChat.LoadRecords<Chatten>(col))       //Der angeklickte Chat wird geladen
+
+    @foreach (var message in Chats)       //Der angeklickte Chat wird geladen
     {
-      if (rec2.SourceUserName == UserName)
+      if (message.SourceUserName == UserName)
       {
         <div style="width:100%">
           <div class="Nachrichten" style="float:right;clear:right ; margin-left:55%">
-            @rec2.Content
+            <p>
+              @message.Content
+            </p>
+            <footer>@SendTime(message.SendTime);</footer>
           </div>
         </div>
       }
-      if (rec2.TargetUserName == UserName)
+      if (message.TargetUserName == UserName)
       {
         <div style="width:100% ">
           <div class="Nachrichten" style="float:left;clear:left ; margin-right:55%">
-            @rec2.Content
+            <p>
+              @message.Content
+              
+            </p>
+            <footer>@SendTime(message.SendTime);</footer>
           </div>
         </div>
+
       }
     }
+
   </div>
   <div class="Chats">
     @foreach (string col in CollectionNames)                              //Die collections bzw chats in den der User was verloren hat, werden geladen.
@@ -53,8 +65,8 @@
       }
     }
   </div>
-  <input class="Chatinput" rows="5" @bind="NewContent" @onkeyup="@SendWithEnter" />
-  <button class="buttn" @onclick="Send">Send</button>
+  <input class="Chatinput" rows="5" @bind="sNewMessage" @onkeyup="@SendWithEnter" />
+  <button class="buttn" @onclick="Send2">Send</button>
 </div>
 
 @code {
@@ -64,11 +76,12 @@
   public string UserName;
   public string Trimmed;
   public string col2;
-  private string NewContent = "";
+  private string sNewMessage = "";
 
   [Parameter]
   public string col { get; set; }
-
+  private DateTime SendingTime = DateTime.UtcNow;
+  private HubConnection hubConnection;
 
   private List<CardinfoItem> Cardinfos = new();
   private List<Chatten> Chats = new();
@@ -77,7 +90,6 @@
 
   MongoCRUD db = new MongoCRUD("Yugioh1");
   MongoCRUD dbChat = new MongoCRUD("Chats");
-
 
   protected override void OnInitialized()
   {
@@ -109,7 +121,8 @@
         SourceUserName = rec2.SourceUserName,
         TargetUserName = rec2.TargetUserName,
         Content = rec2.Content,
-        SendTime = rec2.SendTime
+        SendTime = rec2.SendTime,
+        Gesehen = rec2.Gesehen
       });
     }
 
@@ -126,33 +139,111 @@
     }
   }
 
-  private void Send()
+  protected override async Task OnInitializedAsync()
   {
-    if (!string.IsNullOrWhiteSpace(NewContent))
-    {
-      DateTime timeUtc = DateTime.UtcNow;
+    UserName = httpContextAccessor.HttpContext.User.Identity.Name;      //UserName wird Initialisiert
 
-      dbChat.InsertRecord2(col, col2, new Chatten { SourceUserName = UserName, TargetUserName = col.Split(' ')[0].Trim(), Content = NewContent, SendTime = timeUtc });
-      NewContent = string.Empty;
+    hubConnection = new HubConnectionBuilder()
+    .WithUrl(NM.ToAbsoluteUri("/chathub"))
+    .Build();
+
+    hubConnection.On<string, string, string, DateTime>("ReceiveMessage", (user, user2, message, time) =>
+    {
+
+      Chats.Add(new Chatten
+      {
+        SourceUserName = user,
+        TargetUserName = user2,
+        Content = message,
+        SendTime = time,
+        //Gesehen = rec2.Gesehen
+      });
+
+      StateHasChanged();
+    });
+
+    await hubConnection.StartAsync();
+  }
+
+  async Task Send2()
+  {
+    if (!string.IsNullOrWhiteSpace(sNewMessage))
+    {
+      await hubConnection.SendAsync("SendMessage", UserName, col.Split(' ')[0].Trim(), sNewMessage, SendingTime);       //Gesendetes Material
+
+
+      DateTime timeUtc = DateTime.UtcNow;              //Zeit wird immer 2 Stunden früher in die Datenbank geschrieben
+
+      dbChat.InsertRecord2(col, col2, new Chatten { SourceUserName = UserName, TargetUserName = col.Split(' ')[0].Trim(), Content = sNewMessage, SendTime = timeUtc, Gesehen = false });    //Eintrag in die Datenbank
+      sNewMessage = string.Empty;
+    }
+  }
+  public bool IsConnected =>
+      hubConnection.State == HubConnectionState.Connected;    //Connection für die Liveübertragung
+
+  public async ValueTask DisposeAsync()
+  {
+    if (hubConnection is not null)
+    {
+      await hubConnection.DisposeAsync();
     }
   }
 
-
-  protected void SendWithEnter(KeyboardEventArgs e)
+  protected async void SendWithEnter(KeyboardEventArgs e)       //Mit Enter die Nachricht versenden
   {
     if (e.Code == "Enter" || e.Code == "NumpadEnter")
     {
-      Send();
+      await Send2();
     }
   }
 
   private void SingleChatClick(string col)         //Click Event um zum Chat zu Gelangen
   {
     NM.NavigateTo($"Chat2/{col}");
+    Chats.Clear();
+
+    var recs2 = dbChat.LoadRecords<Chatten>(col);
+    foreach (var rec2 in recs2)
+    {
+      Chats.Add(new Chatten
+      {
+        SourceUserName = rec2.SourceUserName,
+        TargetUserName = rec2.TargetUserName,
+        Content = rec2.Content,
+        SendTime = rec2.SendTime,
+        Gesehen = rec2.Gesehen
+      });
+    }
   }
 
-  private void DeleteChat(string col)
+  private void DeleteChat(string col)           //Chatverlauf löschen
   {
     dbChat.DeleteCollection<Chatten>(col);
+  }
+
+  private string SendTime(DateTime SendTime)    //Funktion für die Sendezeit
+  {
+    string sSendTime;
+
+    var Europe = TimeZoneInfo.FindSystemTimeZoneById("Central European Standard Time");
+    if (SendTime != DateTime.Now)
+    {
+
+      var today = TimeZoneInfo.ConvertTimeFromUtc(SendTime, Europe);
+
+
+      if (today.Date == DateTime.Today.Date)    //Wenn die Nachricht Heute verschickt wurde
+      {
+        sSendTime = today.ToString().Split(' ')[1].Trim();
+      }
+      else
+      {
+        sSendTime = today.ToString().Split(' ')[0].Trim();
+      }
+
+      return sSendTime;
+    }
+    sSendTime = SendTime.ToString();
+    return sSendTime;
   }
 }

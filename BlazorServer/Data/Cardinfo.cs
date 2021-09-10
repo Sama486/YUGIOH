@@ -38,13 +38,10 @@ namespace BlazorServer.Data
     public string TargetUserName { get; set; }
     public string Content { get; set; }
     public DateTime SendTime { get; set; }
+    [BsonElement("Gesehen")]
+    public bool Gesehen { get; set; }
   }
 
-  public class Acteure
-  {
-    public string Käufer { get; set; }
-    public string Verkäufer { get; set; }
-  }
   public class MongoCRUD
   {
     private IMongoDatabase db;

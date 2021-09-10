@@ -17,16 +17,28 @@
   top: 25px;
   overflow: auto;
   border-radius: 10px;
+
+
 }
 
 .Nachrichten {
-  background-color: blueviolet;
+  background-color: #000000;
   padding: 20px;
   margin: 20px;
   max-width: 240px;
   position: center;
+  border-radius: 10px;
 }
 
+  .Nachrichten p {
+    color:#fff;
+    font-weight:bold;
+  }
+  .Nachrichten footer{
+    color :#fff;
+    font-weight: bold;
+    font-size:10px;
+  }
 .Chats {
   background-color: #721e1e;
   width: 230px;
@@ -43,6 +55,10 @@
   height: 100px;
   border: 1px solid;
   cursor: pointer;
+}
+.SingleChat:hover{
+  background-color:#983232;
+  border-color:red
 }
 
   .SingleChat p {

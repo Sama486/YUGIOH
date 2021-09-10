@@ -26,6 +26,7 @@
       Trimmed = col.Split(' ')[0].Trim();
 
         <div class="SingleChat" @onclick="@(e => SingleChatClick(col))" @oncontextmenu="((e) => ContextMenu.ShowAsync(e))" @oncontextmenu:preventDefault>
+          
           <p>@Trimmed</p>
 
         </div>
