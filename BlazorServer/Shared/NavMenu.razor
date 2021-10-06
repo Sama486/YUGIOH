@@ -1,4 +1,14 @@
-﻿<div class="top-row pl-4 navbar navbar-dark">
+﻿@using BlazorServer.Data
+@using MongoDB.Driver
+@using MongoDB.Bson
+@using MongoDB.Bson.Serialization.Attributes
+@using BlazorServer
+@using Microsoft.AspNetCore.Http
+@using Microsoft.AspNetCore.SignalR.Client
+
+@inject IHttpContextAccessor httpContextAccessor
+
+<div class="top-row pl-4 navbar navbar-dark">
   <a class="navbar-brand" href="">YU-GI-OH</a>
   <button class="navbar-toggler" @onclick="ToggleNavMenu">
     <span class="navbar-toggler-icon"></span>
@@ -37,6 +47,10 @@
         <li class="nav-item px-3" @onclick="@ToggleNavMenu">
           <NavLink class="nav-link" href="Chat">
             <span class="oi oi-chat" aria-hidden="true"></span> Chats
+            @if (ChatMessage() == true)
+            {
+              <div style="background-color: blue; border-radius: 50%; height: 20px; width: 20px; margin:40px"></div>
+            }
           </NavLink>
         </li>
         <li class="nav-item px-3" @onclick="@ToggleNavMenu">
@@ -77,6 +91,12 @@
 
 
 @code {
+  private string UserName;
+  private List<string> CollectionNames = new();
+
+  MongoCRUD dbChat = new MongoCRUD("Chats");
+
+
   private bool collapseNavMenu = true;
 
   private string NavMenuCssClass => collapseNavMenu ? "collapse" : null;
@@ -84,5 +104,33 @@
   private void ToggleNavMenu()
   {
     collapseNavMenu = !collapseNavMenu;
+  }
+
+
+  private bool ChatMessage()            //Damit Der Blaue Punkt neben den Chats steht, wenn ungelesene Nachrichten existieren.
+  {
+    UserName = httpContextAccessor.HttpContext.User.Identity.Name;      //UserName wird Initialisiert
+
+    var client = new MongoClient("mongodb://localhost/");   //Host und Port
+
+    var server = client.GetServer();
+    var database = server.GetDatabase("Chats");
+    foreach (var coll in database.GetCollectionNames())     //Collections werden durchsucht
+    {
+      if (coll.Contains(UserName))                          //Wenn Collection den Username beinhaltet, kommt der Chat in die Liste CollectionNames
+      {
+        CollectionNames.Add(coll);
+
+        var recs2 = dbChat.LoadRecords<Chatten>(coll);
+        foreach (var rec2 in recs2)  //Chats werden durchgegangen, an denen der User Beteiligt war
+        {
+          if (rec2.Gesehen == false && rec2.TargetUserName == UserName)     //Falls der Chat noch nicht gelesen wurde und der User der empfänger der Nachricht ist
+          {
+            return true;
+          }
+        }
+      }
+    }
+    return false;
   }
 }

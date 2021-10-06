@@ -16,47 +16,55 @@
 <h1>Chatte mit @col.Split(' ')[0].Trim()</h1>
 <div class="Nachrichtenbox">
   <div class="NachrichtenScrollBox">
-
-    @foreach (var message in Chats)       //Der angeklickte Chat wird geladen
-    {
-      if (message.SourceUserName == UserName)
+    <div>
+      @foreach (var message in Chats)       //Der angeklickte Chat wird geladen
       {
-        <div style="width:100%">
-          <div class="Nachrichten" style="float:right;clear:right ; margin-left:55%">
-            <p>
-              @message.Content
-            </p>
-            <footer>@SendTime(message.SendTime);</footer>
+        if (message.SourceUserName == UserName)
+        {
+          <div style="width:100%">
+            <div class="Nachrichten" style="float:right; clear:right ; margin-left:55%">
+              <p>
+                @message.Content
+              </p>
+              <footer>@SendTime(message.SendTime);</footer>
+            </div>
           </div>
-        </div>
-      }
-      if (message.TargetUserName == UserName)
-      {
-        <div style="width:100% ">
-          <div class="Nachrichten" style="float:left;clear:left ; margin-right:55%">
-            <p>
-              @message.Content
-              
-            </p>
-            <footer>@SendTime(message.SendTime);</footer>
+        }
+        if (message.TargetUserName == UserName)
+        {
+          <div style="width:100% ">
+            <div class="Nachrichten" style="float:left;clear:left ; margin-right:55%">
+              <p>
+                @message.Content
+
+              </p>
+              <footer>@SendTime(message.SendTime);</footer>
+            </div>
           </div>
-        </div>
-
+        }
       }
-    }
-
+    </div>
   </div>
   <div class="Chats">
     @foreach (string col in CollectionNames)                              //Die collections bzw chats in den der User was verloren hat, werden geladen.
     {
       if (col.EndsWith(UserName))                                        //Ich bin Käufer
       {
+        var recs2 = dbChat.LoadRecords<Chatten>(col);
+
         Trimmed = col.Split(' ')[0].Trim();
 
-        <div class="SingleChat" @onclick="@(e => SingleChatClick(col))" @oncontextmenu="((e) => ContextMenu.ShowAsync(e))" @oncontextmenu:preventDefault>
-          <p>@Trimmed</p>
-
-        </div>
+    <div class="SingleChat" @onclick="@(e => SingleChatClick(col))" @oncontextmenu="((e) => ContextMenu.ShowAsync(e))" @oncontextmenu:preventDefault>
+      @foreach (var rec2 in recs2)
+      {
+        if (!rec2.Gesehen && rec2.TargetUserName == UserName)
+        {
+          <div style="background-color: blue; border-radius: 50%; height: 20px; width: 20px; float: right; margin-top:5px; margin-right:5px;"></div>
+          break;
+        }
+      }
+      <p>@Trimmed</p>
+    </div>
         <DxContextMenu @ref="@ContextMenu" ItemClick="@(e => DeleteChat(col))">
           <Items>
             <DxContextMenuItem Text="Delete"></DxContextMenuItem>
@@ -71,7 +79,6 @@
 
 @code {
   DxContextMenu ContextMenu { get; set; }
-
 
   public string UserName;
   public string Trimmed;
@@ -147,9 +154,22 @@
     .WithUrl(NM.ToAbsoluteUri("/chathub"))
     .Build();
 
+    var recs2 = dbChat.LoadRecords<Chatten>(col);
+    foreach (var rec2 in recs2)
+    {
+      Chats.Add(new Chatten
+      {
+        SourceUserName = rec2.SourceUserName,
+        TargetUserName = rec2.TargetUserName,
+        Content = rec2.Content,
+        SendTime = rec2.SendTime,
+        Gesehen = rec2.Gesehen
+      });
+      Gesehen(col, col2, rec2.Id);
+    }
+
     hubConnection.On<string, string, string, DateTime>("ReceiveMessage", (user, user2, message, time) =>
     {
-
       Chats.Add(new Chatten
       {
         SourceUserName = user,
@@ -170,7 +190,6 @@
     if (!string.IsNullOrWhiteSpace(sNewMessage))
     {
       await hubConnection.SendAsync("SendMessage", UserName, col.Split(' ')[0].Trim(), sNewMessage, SendingTime);       //Gesendetes Material
-
 
       DateTime timeUtc = DateTime.UtcNow;              //Zeit wird immer 2 Stunden früher in die Datenbank geschrieben
 
@@ -213,7 +232,14 @@
         SendTime = rec2.SendTime,
         Gesehen = rec2.Gesehen
       });
+      Gesehen(col, col2, rec2.Id);
     }
+
+  }
+
+  public void Gesehen(string col, string col2, Guid id)   //Datenbank Gesehen == True
+  {
+    dbChat.UpdateRecord<Chatten>(col, col2, id);
   }
 
   private void DeleteChat(string col)           //Chatverlauf löschen

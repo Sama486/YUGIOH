@@ -22,14 +22,22 @@
     @foreach(string col in CollectionNames)
     {
       if (col.EndsWith(UserName))                                        //Ich bin Käufer
-      { 
-      Trimmed = col.Split(' ')[0].Trim();
+      {
+        Trimmed = col.Split(' ')[0].Trim();
+        var recs2 = dbChat.LoadRecords<Chatten>(col);
+    <div class="SingleChat" @onclick="@(e => SingleChatClick(col, UserName + " " + Trimmed))" @oncontextmenu="((e) => ContextMenu.ShowAsync(e))" @oncontextmenu:preventDefault>
+      @foreach (var rec2 in recs2)
+      {
+        if (!rec2.Gesehen && rec2.TargetUserName == UserName)
+        {
+          <div style="background-color: blue; border-radius: 50%; height: 20px; width: 20px; float: right; margin-top:5px; margin-right:5px;"></div>
+          break;
+        }
+      }
 
-        <div class="SingleChat" @onclick="@(e => SingleChatClick(col))" @oncontextmenu="((e) => ContextMenu.ShowAsync(e))" @oncontextmenu:preventDefault>
-          
-          <p>@Trimmed</p>
+      <p>@Trimmed</p>
 
-        </div>
+    </div>
         <DxContextMenu @ref="@ContextMenu" ItemClick="@(e => DeleteChat(col))">
           <Items>
             <DxContextMenuItem Text="Delete"></DxContextMenuItem>
@@ -91,16 +99,33 @@
     }
   }
 
-  private void SingleChatClick(string col)         //Click Event um zum Chat zu Gelangen. Die jeweilige Collection ist in der col Variable
+  private void SingleChatClick(string col, string col2)         //Click Event um zum Chat zu Gelangen. Die jeweilige Collection ist in der col Variable
   {
     NM.NavigateTo($"Chat2/{col}");
+
+    var recs2 = dbChat.LoadRecords<Chatten>(col);
+    foreach (var rec2 in recs2)
+    {
+      Chats.Add(new Chatten
+      {
+        SourceUserName = rec2.SourceUserName,
+        TargetUserName = rec2.TargetUserName,
+        Content = rec2.Content,
+        SendTime = rec2.SendTime,
+        Gesehen = rec2.Gesehen
+      });
+      Gesehen(col, col2, rec2.Id);
+    }
   }
 
-  private void DeleteChat(string col)
+  public void Gesehen(string col, string col2, Guid id)   //Datenbank Gesehen == True
+  {
+    dbChat.UpdateRecord<Chatten>(col, col2, id);
+  }
+
+  private void DeleteChat(string col)   //Chat wird Gelöscht
   {
     dbChat.DeleteCollection<Chatten>(col);
     NM.NavigateTo(NM.Uri, forceLoad: true);
   }
-
-
 }

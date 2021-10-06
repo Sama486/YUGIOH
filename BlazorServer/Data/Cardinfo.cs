@@ -84,7 +84,7 @@ namespace BlazorServer.Data
     }
 
     [Obsolete]
-    public void UpsertRecord<T>(string table, Guid id, T record)    //Update
+    public void UpsertRecord<T>(string table, Guid id, T record)    //Upsert
     {
       var collection = db.GetCollection<T>(table);
 
@@ -93,7 +93,17 @@ namespace BlazorServer.Data
         record,
         new UpdateOptions { IsUpsert = true });
     }
+    public void UpdateRecord<T>(string table, string table2, Guid id)        //Update (zbs von gesehen=false auf gesehen=true)
+    {
+      var collection = db.GetCollection<T>(table);
+      var collection2 = db.GetCollection<T>(table2);
 
+      var filter = Builders<T>.Filter.Eq("Id", id);
+      var update = Builders<T>.Update.Set("Gesehen", true);
+
+      collection.UpdateMany(filter, update);
+      collection2.UpdateMany(filter, update);
+    }
     public void DeleteRecordById<T>(string table, Guid id)    // Delete By Record by Id
     {
       var collection = db.GetCollection<T>(table);
