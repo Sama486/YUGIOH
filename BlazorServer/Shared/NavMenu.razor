@@ -117,7 +117,7 @@
     var database = server.GetDatabase("Chats");
     foreach (var coll in database.GetCollectionNames())     //Collections werden durchsucht
     {
-      if (coll.Contains(UserName))                          //Wenn Collection den Username beinhaltet, kommt der Chat in die Liste CollectionNames
+      if (coll.Split(' ')[1].Trim().Contains(UserName))                          //Wenn Collection den Username beinhaltet, kommt der Chat in die Liste CollectionNames
       {
         CollectionNames.Add(coll);
 

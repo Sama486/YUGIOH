@@ -46,26 +46,51 @@
     </div>
   </div>
   <div class="Chats">
-    @foreach (string col in CollectionNames)                              //Die collections bzw chats in den der User was verloren hat, werden geladen.
+    @foreach (var col in CollectionNames)                              //Die collections bzw chats in den der User was verloren hat, werden geladen.
     {
-      if (col.EndsWith(UserName))                                        //Ich bin Käufer
+      if (col.ColName.EndsWith(UserName))                                        //Ich bin Käufer
       {
-        var recs2 = dbChat.LoadRecords<Chatten>(col);
+        var recs2 = dbChat.LoadRecords<Chatten>(col.ColName);
 
-        Trimmed = col.Split(' ')[0].Trim();
+        Trimmed = col.ColName.Split(' ')[0].Trim();
 
-    <div class="SingleChat" @onclick="@(e => SingleChatClick(col))" @oncontextmenu="((e) => ContextMenu.ShowAsync(e))" @oncontextmenu:preventDefault>
+    <div class="SingleChat" @onclick="@(e => SingleChatClick(col.ColName))" @oncontextmenu="((e) => ContextMenu.ShowAsync(e))" @oncontextmenu:preventDefault>
+      <p>@Trimmed</p>
+
       @foreach (var rec2 in recs2)
       {
-        if (!rec2.Gesehen && rec2.TargetUserName == UserName)
+        if (rec2 == recs2[recs2.Count - 1] && !rec2.Gesehen && rec2.TargetUserName == UserName)
         {
-          <div style="background-color: blue; border-radius: 50%; height: 20px; width: 20px; float: right; margin-top:5px; margin-right:5px;"></div>
-          break;
+            <div style="background-color: blue; border-radius: 50%; height: 20px; width: 20px; float: right; margin-bottom:5px; margin-right:5px; "></div>
         }
+        if (i == recs2.Count)
+        {
+          if (rec2.Content.Length > 15)
+          {
+            <p><b>@rec2.Content.Substring(0, 15)...</b></p>
+          }
+          else
+          {
+            <p><b>@rec2.Content</b></p>
+          }
+          i = 1;
+        }
+        else
+        {
+          i++;
+        }
+
       }
-      <p>@Trimmed</p>
+      @*@for(i = 0; i <= recs2.Count -1 ; i++)
+     {
+      if (i == recs2.Count && !recs2[i].Gesehen && recs2[i].TargetUserName == UserName)
+      {
+        <div style="background-color: blue; border-radius: 50%; height: 20px; width: 20px; float: right; margin-top:5px; margin-right:5px;"></div>
+      }
+    }*@
+
     </div>
-        <DxContextMenu @ref="@ContextMenu" ItemClick="@(e => DeleteChat(col))">
+        <DxContextMenu @ref="@ContextMenu" ItemClick="@(e => DeleteChat(col.ColName))">
           <Items>
             <DxContextMenuItem Text="Delete"></DxContextMenuItem>
           </Items>
@@ -80,6 +105,8 @@
 @code {
   DxContextMenu ContextMenu { get; set; }
 
+  bool b = false;
+  public int i = 1;
   public string UserName;
   public string Trimmed;
   public string col2;
@@ -92,7 +119,7 @@
 
   private List<CardinfoItem> Cardinfos = new();
   private List<Chatten> Chats = new();
-  private List<string> CollectionNames = new();
+  private List<SingleChat> CollectionNames = new();
 
 
   MongoCRUD db = new MongoCRUD("Yugioh1");
@@ -103,22 +130,6 @@
     UserName = httpContextAccessor.HttpContext.User.Identity.Name;      //UserName wird Initialisiert
 
     col2 = col.Split(' ')[1].Trim() + " " + col.Split(' ')[0].Trim();
-
-    var recs = db.LoadRecords<CardinfoItem>("CardsToSell");
-    foreach (var rec in recs)
-    {
-      Cardinfos.Add(new CardinfoItem
-      {
-        Id = rec.Id,
-        Verkäufer = rec.Verkäufer,
-        Available = rec.Available,
-        CardName = rec.CardName,
-        Price = rec.Price,
-        Editionnumber = rec.Editionnumber,
-        Rarity = rec.Rarity,
-        Zustand = rec.Zustand,
-      });
-    }
 
     var recs2 = dbChat.LoadRecords<Chatten>(col);
     foreach (var rec2 in recs2)
@@ -134,16 +145,21 @@
     }
 
     var client = new MongoClient("mongodb://localhost/");   //Host und Port
-
     var server = client.GetServer();
     var database = server.GetDatabase("Chats");
-    foreach (var coll in database.GetCollectionNames())     //Collections werden durchsucht
+    foreach (var col in database.GetCollectionNames())     //Collections werden durchsucht
     {
-      if (coll.Contains(UserName))                          //Wenn Collection den Username beinhaltet, kommt der Chat in die Liste CollectionNames
+      if (col.EndsWith(UserName))                          //Wenn Collection den Username beinhaltet, kommt der Chat in die Liste CollectionNames
       {
-        CollectionNames.Add(coll);
+        var recs2_ = dbChat.LoadRecords<Chatten>(col);
+        CollectionNames.Add(new SingleChat       //CollectionName und Sendtime wird in die Liste geschrieben, damit die nach der Zeit geordnet werden kann.
+        {
+          ColName = col,
+          SendTime = recs2_[recs2_.Count -1 ].SendTime
+        });
       }
     }
+    CollectionNames.Sort((x, y) => DateTime.Compare(y.SendTime, x.SendTime));   //Liste wird umgekehrt sortiert, damit Der Letzte SingleChat oben steht.
   }
 
   protected override async Task OnInitializedAsync()

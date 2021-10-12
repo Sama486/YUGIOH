@@ -42,6 +42,12 @@ namespace BlazorServer.Data
     public bool Gesehen { get; set; }
   }
 
+  public class SingleChat
+  {
+    public string ColName { get; set; }
+    public DateTime SendTime { get; set; }
+  }
+
   public class MongoCRUD
   {
     private IMongoDatabase db;
