@@ -27,6 +27,8 @@ namespace BlazorServer.Data
     public string Rarity { get; set; }
 
     public string Zustand { get; set; }
+
+    public bool bro { get; set; }
   }
 
 
@@ -99,7 +101,17 @@ namespace BlazorServer.Data
         record,
         new UpdateOptions { IsUpsert = true });
     }
-    public void UpdateRecord<T>(string table, string table2, Guid id)        //Update (zbs von gesehen=false auf gesehen=true)
+    
+    public void UpdateRecordById<T>(string table, Guid id, string Cardname, string price, string editionnumber, string rarity, string zustand)
+    {
+      var collection = db.GetCollection<T>(table);
+
+      var filter = Builders<T>.Filter.Eq("Id", id);
+      var update = Builders<T>.Update.Set("CardName", Cardname).Set("Price", price).Set("Editionnumber", editionnumber).Set("Rarity", rarity).Set("Zustand", zustand);
+
+      collection.UpdateMany(filter, update);
+    }
+    public void UpdateRecordChat<T>(string table, string table2, Guid id)        //Update (zbs von gesehen=false auf gesehen=true)
     {
       var collection = db.GetCollection<T>(table);
       var collection2 = db.GetCollection<T>(table2);

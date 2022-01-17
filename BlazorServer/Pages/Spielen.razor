@@ -1,10 +1,25 @@
 ﻿@page "/Spielen"
 
+@using System.IO;
 @using BlazorServer.Data
 
-<h1>Blazor Memory Game</h1>
+@inject NavigationManager NM
 
-<p>Viel Spaß beim spielen!</p>
+<style>
+  body {
+    background-color: lightgray;
+  }
+</style>
+<div style="width:50%; float: left;">
+  <h1 style="color:black">Blazor Memory Game</h1>
+</div>
+
+<div style="width: 50%;float:right; text-align:right">
+  <h1 style="color: black">@GefundenePaare Paare</h1>
+</div>
+
+
+<p style="color: black">Viel Spaß beim spielen!</p>
 
 
 
@@ -18,24 +33,49 @@
     if (matchedCards.Contains(index))
     {
       <div class="found"></div>
+      if (GefundenePaare == 16)
+      {
+        PopupVisible = true;
+      }
     }
     else
     {
+      string scard = "YugiohKarten/" + card.ToString() + ".jfif";     //Pfad für die Karten.
+
       <div @onclick="() => CardClicked(localIndex)">
-        <span hidden="@(!clickedCards.Contains(localIndex))">@card</span>
+        <span hidden="@(clickedCards.Contains(localIndex))"><img src="images/yugiohRückseite.jpg" style="height:100%;width:100%" /></span>
+        <span hidden="@(!clickedCards.Contains(localIndex))"><img src="@scard" style="height:100%;width:100%" /></span>
       </div>
     }
   }
-
 </div>
+<DxPopup @bind-Visible="@PopupVisible"
+         HeaderText="Wow"
+         ShowFooter="true">
+  <BodyContentTemplate>
+    <i>
+      Glückwunsch sie haben es geschafft!
+    </i>
+  </BodyContentTemplate>
+  <FooterContentTemplate>
+    <DxButton RenderStyle="ButtonRenderStyle.Success" Text="Gut gemacht!"
+              Click="@context.CloseCallback"  />
+  </FooterContentTemplate>
+</DxPopup>
+@if(GefundenePaare == 16)
+      {
+        <button @onclick="NochmalSpielen"></button>
+      }
 
 @code {
+  int GefundenePaare = 0;
   int numberOfCards = 32;
-  List<int> cards = new List<int>();
   int[] cardArray = new int[32];
+  List<int> cards = new List<int>();
   List<int> clickedCards = new List<int>();
   List<int> matchedCards = new List<int>();
 
+  bool PopupVisible { get; set; } = false;
 
   protected override void OnInitialized()
   {
@@ -53,29 +93,39 @@
       cards.RemoveAt(randomNumber);
     }
   }
-  void CardClicked(int index)
+
+  void NochmalSpielen()
   {
+    NM.NavigateTo("/Spielen");
+  }
 
+void CardClicked(int index)
+{
+  if (clickedCards.Count == 2)
+  {
+    clickedCards.Clear();
+  }
+  if (clickedCards.Count == 2)
+    return;
+  clickedCards.Add(index);
+
+  Task.Delay(1000).ContinueWith((t) =>          // programm muss sleepen, um buggs zu vermeiden
+  {
     if (clickedCards.Count == 2)
-      return;
-    clickedCards.Add(index);
-
-    Task.Delay(1000).ContinueWith((t) =>
     {
-      if (clickedCards.Count == 2)
-      {
-        int num1 = cardArray[clickedCards[0]];
-        int num2 = cardArray[clickedCards[1]];
+      int num1 = cardArray[clickedCards[0]];
+      int num2 = cardArray[clickedCards[1]];
 
-        if (num1 == num2)
-        {
-          matchedCards.Add(clickedCards[0]);
-          matchedCards.Add(clickedCards[1]);
-        }
+      if (num1 == num2 && clickedCards[0] != clickedCards[1])   // diese bedingung dient dazu dass zwei gleiche karten, die nicht den selben index aufweisen als päärchen gelten.
+      {
+        matchedCards.Add(clickedCards[0]);
+        matchedCards.Add(clickedCards[1]);
 
         clickedCards.Clear();
+        GefundenePaare++;
       }
-    });
-
-  }
+      clickedCards.Clear();   //Cards werden gecleared, damit sie nichtmehr als angeklickt gelten.
+    }
+  });
+}
 }

@@ -255,7 +255,7 @@
 
   public void Gesehen(string col, string col2, Guid id)   //Datenbank Gesehen == True
   {
-    dbChat.UpdateRecord<Chatten>(col, col2, id);
+    dbChat.UpdateRecordChat<Chatten>(col, col2, id);
   }
 
   private void DeleteChat(string col)           //Chatverlauf löschen

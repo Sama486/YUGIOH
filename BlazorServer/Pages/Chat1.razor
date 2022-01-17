@@ -124,14 +124,13 @@
     var recs2 = dbChat.LoadRecords<Chatten>(col);
     foreach (var rec2 in recs2)
     {
-
       Gesehen(col, col2, rec2.Id);
     }
   }
 
   public void Gesehen(string col, string col2, Guid id)   //Datenbank Gesehen == True
   {
-    dbChat.UpdateRecord<Chatten>(col, col2, id);
+    dbChat.UpdateRecordChat<Chatten>(col, col2, id);
   }
 
   private void DeleteChat(string col)   //Chat wird Gelöscht
