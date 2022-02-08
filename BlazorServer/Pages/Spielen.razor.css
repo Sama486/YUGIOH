@@ -25,3 +25,28 @@
     background: lightgray;
   }
 
+.buttn {
+  display: inline-block;
+  padding: 15px 25px;
+  font-size: 24px;
+  cursor: pointer;
+  text-align: center;
+  text-decoration: none;
+  outline: none;
+  color: #fff;
+  background-color: #721e1e;
+  border: none;
+  border-radius: 15px;
+  box-shadow: 0 9px #2f2f2f;
+  position: absolute;
+}
+
+  .buttn:hover {
+    background-color: #983232;
+  }
+
+  .buttn:active {
+    background-color: #721e1e;
+    box-shadow: 0 5px #2f2f2f;
+    transform: translateY(4px);
+  }

@@ -209,7 +209,9 @@
 
       DateTime timeUtc = DateTime.UtcNow;              //Zeit wird immer 2 Stunden früher in die Datenbank geschrieben
 
-      dbChat.InsertRecord2(col, col2, new Chatten { SourceUserName = UserName, TargetUserName = col.Split(' ')[0].Trim(), Content = sNewMessage, SendTime = timeUtc, Gesehen = false });    //Eintrag in die Datenbank
+      //dbChat.InsertRecord2(col, col2, new Chatten { SourceUserName = UserName, TargetUserName = col.Split(' ')[0].Trim(), Content = sNewMessage, SendTime = timeUtc, Gesehen = false });    //Eintrag in die Datenbank
+      dbChat.InsertRecord(col, new Chatten { SourceUserName = UserName, TargetUserName = col.Split(' ')[0].Trim(), Content = sNewMessage, SendTime = timeUtc, Gesehen = false });
+      dbChat.InsertRecord(col2, new Chatten { SourceUserName = UserName, TargetUserName = col.Split(' ')[0].Trim(), Content = sNewMessage, SendTime = timeUtc, Gesehen = false });
       sNewMessage = string.Empty;
     }
   }

@@ -13,19 +13,25 @@
 @inject IHttpContextAccessor httpContextAccessor
 @inject NavigationManager NM
 
-<h1>Hello, Yugioh Fans!</h1>
-<DxDateEdit Date="DateTime.Today"></DxDateEdit>
-<AuthorizeView>
-  <Authorized>
-    <h1>hello, @UserName</h1>
-  </Authorized>
-</AuthorizeView>
+  <section class="bg-dark text-light p-5 text-center p-lg-0 pt-lg-5 text-sm-start">
+    <div class="container">
+      <div class="d-sm-flex align-items-center justify-content-between">
+        <h1>Hello, Yugioh Fans!</h1>
+        <AuthorizeView>
+          <Authorized>
+            <h1>Welcome, @UserName</h1>
+          </Authorized>
+        </AuthorizeView>
+      </div>
+    </div>
+  </section>
 
-@code{
-  public string UserName;
 
-  protected override void OnInitialized()
-  {
-    UserName = httpContextAccessor.HttpContext.User.Identity.Name;      //UserName wird Initialisiert
+  @code{
+    public string UserName;
+
+    protected override void OnInitialized()
+    {
+      UserName = httpContextAccessor.HttpContext.User.Identity.Name;      //UserName wird Initialisiert
+    }
   }
-}
