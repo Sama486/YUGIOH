@@ -1,37 +1,29 @@
 ﻿@page "/"
 
-@using BlazorServer.Data
-@using MongoDB.Driver
-@using MongoDB.Bson
-@using MongoDB.Bson.Serialization.Attributes
-@using BlazorServer
 @using Microsoft.AspNetCore.Http
-@using Microsoft.AspNetCore.SignalR.Client
-
-
 
 @inject IHttpContextAccessor httpContextAccessor
-@inject NavigationManager NM
+@inject NavigationManager NavManager
 
-  <section class="bg-dark text-light p-5 text-center p-lg-0 pt-lg-5 text-sm-start">
-    <div class="container">
-      <div class="d-sm-flex align-items-center justify-content-between">
-        <h1>Hello, Yugioh Fans!</h1>
-        <AuthorizeView>
-          <Authorized>
-            <h1>Welcome, @UserName</h1>
-          </Authorized>
-        </AuthorizeView>
-      </div>
+<section class="bg-dark text-light p-5 text-center p-lg-0 pt-lg-5 text-sm-start">
+  <div class="container">
+    <div class="d-sm-flex align-items-center justify-content-between">
+      <h1>Hello, Yugioh Fans!</h1>
+      <AuthorizeView>
+        <Authorized>
+          <h1>Welcome, @UserName</h1>
+        </Authorized>
+      </AuthorizeView>
     </div>
-  </section>
+  </div>
+</section>
 
+@code
+{
+  public string UserName;
 
-  @code{
-    public string UserName;
-
-    protected override void OnInitialized()
-    {
-      UserName = httpContextAccessor.HttpContext.User.Identity.Name;      //UserName wird Initialisiert
-    }
+  protected override void OnInitialized()
+  {
+    UserName = httpContextAccessor.HttpContext.User.Identity.Name;      //UserName wird Initialisiert
   }
+}

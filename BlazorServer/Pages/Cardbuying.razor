@@ -1,5 +1,5 @@
 ﻿@page "/Cardbuying"
-@inject NavigationManager NM
+@inject NavigationManager NavManager
 @inject IHttpContextAccessor httpContextAccessor
 @using Microsoft.AspNetCore.Http
 @using BlazorServer.Data
@@ -25,17 +25,17 @@
         </tr>
       </thead>
       <tbody>
-        @foreach (var Cardinfo in Cardinfos)
+        @foreach (var Cardselling in Cardsellings)
         {
-          if (!IsVisible(Cardinfo))
+          if (!IsVisible(Cardselling))
             continue;
           <tr>
-            <td>@Cardinfo.CardName</td>
-            <td>@Cardinfo.Price</td>
-            <td>@Cardinfo.Editionnumber</td>
-            <td>@Cardinfo.Rarity</td>
-            <td>@Cardinfo.Zustand</td>
-            <td><button @onclick="@(e => buy(Cardinfo.Verkäufer))" class="BtnBuy">Kaufen</button></td>
+            <td>@Cardselling.CardName</td>
+            <td>@Cardselling.Price</td>
+            <td>@Cardselling.EditionNumber</td>
+            <td>@Cardselling.Rarity</td>
+            <td>@Cardselling.Condition</td>
+            <td><button @onclick="@(e => buy(Cardselling.Seller))" class="BtnBuy">Kaufen</button></td>
           </tr>
         }
       </tbody>
@@ -59,16 +59,16 @@
         </tr>
       </thead>
       <tbody>
-        @foreach (var Cardinfo in Cardinfos)
+        @foreach (var Cardselling in Cardsellings)
         {
-          if (!IsVisible(Cardinfo))
+          if (!IsVisible(Cardselling))
             continue;
           <tr>
-            <td>@Cardinfo.CardName</td>
-            <td>@Cardinfo.Price</td>
-            <td>@Cardinfo.Editionnumber</td>
-            <td>@Cardinfo.Rarity</td>
-            <td>@Cardinfo.Zustand</td>
+            <td>@Cardselling.CardName</td>
+            <td>@Cardselling.Price</td>
+            <td>@Cardselling.EditionNumber</td>
+            <td>@Cardselling.Rarity</td>
+            <td>@Cardselling.Condition</td>
           </tr>
         }
       </tbody>
@@ -77,46 +77,46 @@
 </AuthorizeView>
 
 
-@code{
+@code
+{
   public string UserName;
   public string UserComb;
   public string col;
 
-  private List<CardinfoItem> Cardinfos = new();
-  //private List<Acteure> Acteures = new();
+  private List<CardsellingItem> Cardsellings = new();
 
   MongoCRUD db = new MongoCRUD("Yugioh1");
-
 
   protected override void OnInitialized()
   {
     UserName = httpContextAccessor.HttpContext.User.Identity.Name;      //UserName wird Initialisiert
 
-    var recs = db.LoadRecords<CardinfoItem>("CardsToSell");
+    var recs = db.LoadRecords<CardsellingItem>("CardsToSell");
     foreach (var rec in recs)
     {
-      Cardinfos.Add(new CardinfoItem
+      Cardsellings.Add(new CardsellingItem
       {
         Id = rec.Id,
-        Verkäufer = rec.Verkäufer,
+        Seller = rec.Seller,
         Available = rec.Available,
         CardName = rec.CardName,
         Price = rec.Price,
-        Editionnumber = rec.Editionnumber,
+        EditionNumber = rec.EditionNumber,
         Rarity = rec.Rarity,
-        Zustand = rec.Zustand,
+        Condition = rec.Condition,
       });
     }
   }
+
   public string Suchen { get; set; }
 
-  public bool IsVisible(CardinfoItem Cardinfo)
+  public bool IsVisible(CardsellingItem Cardselling)
   {
 
     if (string.IsNullOrEmpty(Suchen))
       return true;
 
-    if (Cardinfo.CardName.Contains(Suchen, StringComparison.OrdinalIgnoreCase))
+    if (Cardselling.CardName.Contains(Suchen, StringComparison.OrdinalIgnoreCase))
       return true;
 
     return false;
@@ -126,17 +126,15 @@
   {
     if (_Verkäufer == UserName)
     {
-
     }
     else
     {
       //string[] Acteures = { _Verkäufer, UserName };
       //UserComb = Acteures[0].ToString() + " sells to " + Acteures[1].ToString();
-      //NM.NavigateTo($"Chat2/{_Verkäufer}/{UserComb}");
+      //NavManager.NavigateTo($"Chat2/{_Verkäufer}/{UserComb}");
 
       col = _Verkäufer + " " + UserName;
-      NM.NavigateTo($"Chat2/{col}");
-
+      NavManager.NavigateTo($"Chat2/{col}");
     }
   }
 }

@@ -10,7 +10,7 @@
 
 
 @inject IHttpContextAccessor httpContextAccessor
-@inject NavigationManager NM
+@inject NavigationManager NavManager
 
 
 <h1>Chatte mit @col.Split(' ')[0].Trim()</h1>
@@ -26,7 +26,7 @@
               <p>
                 @message.Content
               </p>
-              <footer>@SendTime(message.SendTime);</footer>
+              <footer>@SendTime(message.SendTime)</footer>
             </div>
           </div>
         }
@@ -38,7 +38,7 @@
                 @message.Content
 
               </p>
-              <footer>@SendTime(message.SendTime);</footer>
+              <footer>@SendTime(message.SendTime)</footer>
             </div>
           </div>
         }
@@ -59,7 +59,7 @@
 
       @foreach (var rec2 in recs2)
       {
-        if (rec2 == recs2[recs2.Count - 1] && !rec2.Gesehen && rec2.TargetUserName == UserName)
+        if (rec2 == recs2[recs2.Count - 1] && !rec2.Seen && rec2.TargetUserName == UserName)
         {
             <div style="background-color: blue; border-radius: 50%; height: 20px; width: 20px; float: right; margin-bottom:5px; margin-right:5px; "></div>
         }
@@ -83,7 +83,7 @@
       }
       @*@for(i = 0; i <= recs2.Count -1 ; i++)
      {
-      if (i == recs2.Count && !recs2[i].Gesehen && recs2[i].TargetUserName == UserName)
+      if (i == recs2.Count && !recs2[i].Seen && recs2[i].TargetUserName == UserName)
       {
         <div style="background-color: blue; border-radius: 50%; height: 20px; width: 20px; float: right; margin-top:5px; margin-right:5px;"></div>
       }
@@ -105,7 +105,6 @@
 @code {
   DxContextMenu ContextMenu { get; set; }
 
-  bool b = false;
   public int i = 1;
   public string UserName;
   public string Trimmed;
@@ -117,10 +116,9 @@
   private DateTime SendingTime = DateTime.UtcNow;
   private HubConnection hubConnection;
 
-  private List<CardinfoItem> Cardinfos = new();
+  private List<CardsellingItem> Cardsellings = new();
   private List<Chatten> Chats = new();
   private List<SingleChat> CollectionNames = new();
-
 
   MongoCRUD db = new MongoCRUD("Yugioh1");
   MongoCRUD dbChat = new MongoCRUD("Chats");
@@ -131,18 +129,18 @@
 
     col2 = col.Split(' ')[1].Trim() + " " + col.Split(' ')[0].Trim();
 
-    var recs2 = dbChat.LoadRecords<Chatten>(col);
-    foreach (var rec2 in recs2)
-    {
-      Chats.Add(new Chatten
-      {
-        SourceUserName = rec2.SourceUserName,
-        TargetUserName = rec2.TargetUserName,
-        Content = rec2.Content,
-        SendTime = rec2.SendTime,
-        Gesehen = rec2.Gesehen
-      });
-    }
+    //var recs2 = dbChat.LoadRecords<Chatten>(col);
+    //foreach (var rec2 in recs2)
+    //{
+    //  Chats.Add(new Chatten
+    //  {
+    //    SourceUserName = rec2.SourceUserName,
+    //    TargetUserName = rec2.TargetUserName,
+    //    Content = rec2.Content,
+    //    SendTime = rec2.SendTime,
+    //    Seen = rec2.Seen
+    //  });
+    //}
 
     var client = new MongoClient("mongodb://localhost/");   //Host und Port
     var server = client.GetServer();
@@ -167,7 +165,7 @@
     UserName = httpContextAccessor.HttpContext.User.Identity.Name;      //UserName wird Initialisiert
 
     hubConnection = new HubConnectionBuilder()
-    .WithUrl(NM.ToAbsoluteUri("/chathub"))
+    .WithUrl(NavManager.ToAbsoluteUri("/chathub"))
     .Build();
 
     var recs2 = dbChat.LoadRecords<Chatten>(col);
@@ -179,9 +177,9 @@
         TargetUserName = rec2.TargetUserName,
         Content = rec2.Content,
         SendTime = rec2.SendTime,
-        Gesehen = rec2.Gesehen
+        Seen = rec2.Seen
       });
-      Gesehen(col, col2, rec2.Id);
+      Seen(col, col2, rec2.Id);
     }
 
     hubConnection.On<string, string, string, DateTime>("ReceiveMessage", (user, user2, message, time) =>
@@ -192,7 +190,7 @@
         TargetUserName = user2,
         Content = message,
         SendTime = time,
-        //Gesehen = rec2.Gesehen
+        //Seen = rec2.Seen
       });
 
       StateHasChanged();
@@ -209,9 +207,9 @@
 
       DateTime timeUtc = DateTime.UtcNow;              //Zeit wird immer 2 Stunden früher in die Datenbank geschrieben
 
-      //dbChat.InsertRecord2(col, col2, new Chatten { SourceUserName = UserName, TargetUserName = col.Split(' ')[0].Trim(), Content = sNewMessage, SendTime = timeUtc, Gesehen = false });    //Eintrag in die Datenbank
-      dbChat.InsertRecord(col, new Chatten { SourceUserName = UserName, TargetUserName = col.Split(' ')[0].Trim(), Content = sNewMessage, SendTime = timeUtc, Gesehen = false });
-      dbChat.InsertRecord(col2, new Chatten { SourceUserName = UserName, TargetUserName = col.Split(' ')[0].Trim(), Content = sNewMessage, SendTime = timeUtc, Gesehen = false });
+      //dbChat.InsertRecord2(col, col2, new Chatten { SourceUserName = UserName, TargetUserName = col.Split(' ')[0].Trim(), Content = sNewMessage, SendTime = timeUtc, Seen = false });    //Eintrag in die Datenbank
+      dbChat.InsertRecord(col, new Chatten { SourceUserName = UserName, TargetUserName = col.Split(' ')[0].Trim(), Content = sNewMessage, SendTime = timeUtc, Seen = false });
+      dbChat.InsertRecord(col2, new Chatten { SourceUserName = UserName, TargetUserName = col.Split(' ')[0].Trim(), Content = sNewMessage, SendTime = timeUtc, Seen = false });
       sNewMessage = string.Empty;
     }
   }
@@ -236,7 +234,7 @@
 
   private void SingleChatClick(string col)         //Click Event um zum Chat zu Gelangen
   {
-    NM.NavigateTo($"Chat2/{col}");
+    NavManager.NavigateTo($"Chat2/{col}");
     Chats.Clear();
 
     var recs2 = dbChat.LoadRecords<Chatten>(col);
@@ -248,14 +246,13 @@
         TargetUserName = rec2.TargetUserName,
         Content = rec2.Content,
         SendTime = rec2.SendTime,
-        Gesehen = rec2.Gesehen
+        Seen = rec2.Seen
       });
-      Gesehen(col, col2, rec2.Id);
+      Seen(col, col2, rec2.Id);
     }
-
   }
 
-  public void Gesehen(string col, string col2, Guid id)   //Datenbank Gesehen == True
+  public void Seen(string col, string col2, Guid id)   //Datenbank Seen == True
   {
     dbChat.UpdateRecordChat<Chatten>(col, col2, id);
   }

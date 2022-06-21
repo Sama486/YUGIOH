@@ -41,13 +41,17 @@
   background-color: #721e1e;
   width: 230px;
   height: 100px;
-  border: 1px solid;
+  border-left: 1px solid;
+  border-right: 1px solid;
+  border-top: none;
+  border-bottom: 1px solid;
   cursor: pointer;
   /*text-align: center;
   vertical-align: middle;
   line-height: 100px;*/ /* The same as your div height */
 }
   .SingleChat:hover {
+    border: 1px solid;
     background-color: #983232;
     border-color: red
   }

@@ -3,7 +3,7 @@
 @using System.IO;
 @using BlazorServer.Data
 @using BlazorServer.Pages
-@inject NavigationManager NM
+@inject NavigationManager NavManager
 
 <style>
   body {
@@ -96,7 +96,7 @@
 
   void NochmalSpielen()
   {
-    NM.NavigateTo("/Spielen", true);
+   NavManager.NavigateTo("/Spielen", true);
   }
 
 void CardClicked(int index)

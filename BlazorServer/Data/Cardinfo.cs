@@ -9,27 +9,19 @@ using BlazorServer.Pages;
 
 namespace BlazorServer.Data
 {
-  
-  public class CardinfoItem
+  public class CardsellingItem
   {
     [BsonId]
     public Guid Id { get; set; }
 
-    public string Verkäufer { get; set; }
+    public string Seller { get; set; }
     public string CardName { get; set; }
-
     public bool Available { get; set; }
-
     public string Price { get; set; }
-
-    public string Editionnumber { get; set; }
-
+    public string EditionNumber { get; set; }
     public string Rarity { get; set; }
-
-    public string Zustand { get; set; }
-
-    public bool bro { get; set; }
-  }
+    public string Condition { get; set; }
+      }
 
 
   public class Chatten
@@ -40,8 +32,8 @@ namespace BlazorServer.Data
     public string TargetUserName { get; set; }
     public string Content { get; set; }
     public DateTime SendTime { get; set; }
-    [BsonElement("Gesehen")]
-    public bool Gesehen { get; set; }
+    [BsonElement("Seen")]
+    public bool Seen { get; set; }
   }
 
   public class SingleChat
@@ -54,7 +46,6 @@ namespace BlazorServer.Data
   {
     private IMongoDatabase db;
 
-    
     public MongoCRUD(string database)   //Connecting to MongoDB
     {
       var client = new MongoClient();
@@ -74,7 +65,6 @@ namespace BlazorServer.Data
       var collection2 = db.GetCollection<T>(table2);
       collection2.InsertOne(record);
     }
-
 
     public List<T> LoadRecords<T>(string table)   //Load
     {
@@ -101,27 +91,29 @@ namespace BlazorServer.Data
         record,
         new UpdateOptions { IsUpsert = true });
     }
-    
-    public void UpdateRecordById<T>(string table, Guid id, string Cardname, string price, string editionnumber, string rarity, string zustand)
+
+    public void UpdateRecordById<T>(string table, Guid id, string Cardname, string price, string editionnumber, string rarity, string condition)
     {
       var collection = db.GetCollection<T>(table);
 
       var filter = Builders<T>.Filter.Eq("Id", id);
-      var update = Builders<T>.Update.Set("CardName", Cardname).Set("Price", price).Set("Editionnumber", editionnumber).Set("Rarity", rarity).Set("Zustand", zustand);
+      var update = Builders<T>.Update.Set("CardName", Cardname).Set("Price", price).Set("EditionNumber", editionnumber).Set("Rarity", rarity).Set("Condition", condition);
 
       collection.UpdateMany(filter, update);
     }
-    public void UpdateRecordChat<T>(string table, string table2, Guid id)        //Update (zbs von gesehen=false auf gesehen=true)
+
+    public void UpdateRecordChat<T>(string table, string table2, Guid id)        //Update (zbs von Seen=false auf Seen=true)
     {
       var collection = db.GetCollection<T>(table);
       var collection2 = db.GetCollection<T>(table2);
 
       var filter = Builders<T>.Filter.Eq("Id", id);
-      var update = Builders<T>.Update.Set("Gesehen", true);
+      var update = Builders<T>.Update.Set("Seen", true);
 
       collection.UpdateMany(filter, update);
       collection2.UpdateMany(filter, update);
     }
+    
     public void DeleteRecordById<T>(string table, Guid id)    // Delete By Record by Id
     {
       var collection = db.GetCollection<T>(table);
@@ -129,11 +121,11 @@ namespace BlazorServer.Data
       collection.DeleteOne(filter);
     }
     
-    public void DeleteCollection<T>( string col )
+    public void DeleteCollection<T>(string col)
     {
       db.DropCollection(col);
     }
   }
-  
+
 }
 

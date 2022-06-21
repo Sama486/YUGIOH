@@ -43,6 +43,20 @@
   height: 30px;
 }
 
+.btnsave {
+  display: inline-block;
+  font-size: 15px;
+  cursor: pointer;
+  text-align: center;
+  text-decoration: none;
+  outline: none;
+  color: #fff;
+  background-color: #00ff00;
+  border: none;
+  border-radius: 15px;
+  box-shadow: 0 5px #999;
+  height: 30px;
+}
   .btndelete:hover {
     background-color: #ff0000;
   }

@@ -1,19 +1,17 @@
-﻿@page "/Cardinfo"
-@inject NavigationManager NM
+﻿@page "/Cardselling"
+
+@inject NavigationManager NavManager
 @inject IJSRuntime JsRuntime
 @inject IHttpContextAccessor httpContextAccessor
+
 @using Microsoft.AspNetCore.Http
 @using BlazorServer.Data
-@using System.Threading;
 
-<h1>Karten mit denen was gemacht werden soll(@Cardinfos.Count(Cardinfo => Cardinfo.Available))</h1>
+<h1 class="grün">Verkaufen</h1>
 
 <table class="table">
   <thead class="thead-light">
     <tr>
-      <th>
-        <p class="grün">Verkaufen</p>
-      </th>
       <th>
         <p>Name</p>
       </th>
@@ -29,23 +27,26 @@
       <th>
         <p>Zustand</p>
       </th>
+      <th>
+      </th>
+      <th>
+      </th>
 
     </tr>
 
-    @foreach (var Cardinfo in Cardinfos)
-        {
+    @foreach (var Cardselling in Cardsellings)
+    {
       <tr>
-        <td><input type="checkbox" @bind="Cardinfo.Available" /></td>
-        <td><input @bind="Cardinfo.CardName" /></td>
-        <td><input @bind="Cardinfo.Price" /></td>
-        <td><input @bind="Cardinfo.Editionnumber" /></td>
-        <td><input @bind="Cardinfo.Rarity" /></td>
-        <td><input @bind="Cardinfo.Zustand" /></td>
-        <td><button type="button" class="bg-success" @onclick="@(e => edit(Cardinfo.Id, Cardinfo.CardName, Cardinfo.Price, Cardinfo.Editionnumber, Cardinfo.Rarity,Cardinfo.Zustand))"> Edit</button></td>
-        <td><button type="button" class="btndelete" @onclick="@(e => del(Cardinfo.Id))"> Delete </button></td>
+        <td><input @bind="Cardselling.CardName" /></td>
+        <td><input @bind="Cardselling.Price" /></td>
+        <td><input @bind="Cardselling.EditionNumber" /></td>
+        <td><input @bind="Cardselling.Rarity" /></td>
+        <td><input @bind="Cardselling.Condition" /></td>
+        <td><button type="button" class="btnsave" @onclick="@(e => edit(Cardselling.Id, Cardselling.CardName, Cardselling.Price, Cardselling.EditionNumber, Cardselling.Rarity,Cardselling.Condition))">Save</button></td>
+        <td><button type="button" class="btndelete" @onclick="@(e => del(Cardselling.Id))"> Delete </button></td>
       </tr>
-          
-        }
+
+    }
 
   </thead>
   <tbody>
@@ -53,6 +54,8 @@
       <td>
         <p>Eingabe</p>
       </td>
+    </tr>
+    <tr>
       <td>
         <input placeholder="Card Name" @bind="sNewCard" />
       </td>
@@ -60,7 +63,7 @@
         <input min="0.00" step="0,01" placeholder="Card price" @bind="fNewPrice" />
       </td>
       <td>
-        <input placeholder="Card editionnumber" @bind="sNeweditionnumber" />
+        <input placeholder="Card editionnumber" @bind="sNewEditionNumber" />
       </td>
       <td>
         <select required class="select-box" @bind="sNewrarity">
@@ -85,7 +88,7 @@
         </select>
       </td>
       <td>
-        <select required class="select-box" @bind="sNewzustand">
+        <select required class="select-box" @bind="sNewCondition">
           <option value="" disabled selected>Wähle Zustand</option>
           <option>Mint</option>
           <option>Near Mint</option>
@@ -97,91 +100,90 @@
           <option>Beschädigt</option>
         </select>
       </td>
+      <td colspan="2">
+        <button class="butt" @onclick="AddCard">Add Card</button>
+      </td>
     </tr>
   </tbody>
 </table>
-<button class="butt" @onclick="AddCard">Add Card</button>
+
 
 
 @code {
-  private List<CardinfoItem> Cardinfos = new();
+  private List<CardsellingItem> Cardsellings = new();
   private string sNewCard;
   private float? fNewPrice;
-  private string sNeweditionnumber;
+  private string sNewEditionNumber;
   private string sNewrarity;
-  private string sNewzustand;
+  private string sNewCondition;
   public string UserName;     //UserName wird Deklariert
 
-
   MongoCRUD db = new MongoCRUD("Yugioh1");      //Database wird erstellt
-
-
 
   protected override void OnInitialized()     //Database Daten werden Hochgeladen und kommen in die Tabelle
   {
     UserName = httpContextAccessor.HttpContext.User.Identity.Name;      //UserName wird Initialisiert
-    var recs = db.LoadRecords<CardinfoItem>(UserName);
+    var recs = db.LoadRecords<CardsellingItem>(UserName);
 
     foreach (var rec in recs)
     {
-      Cardinfos.Add(new CardinfoItem      //Database Daten kommen in die Liste
+      Cardsellings.Add(new CardsellingItem      //Database Daten kommen in die Liste
       {
         Id = rec.Id,
-        Verkäufer = rec.Verkäufer,
+        Seller = rec.Seller,
         Available = rec.Available,
         CardName = rec.CardName,
         Price = rec.Price,
-        Editionnumber = rec.Editionnumber,
+        EditionNumber = rec.EditionNumber,
         Rarity = rec.Rarity,
-        Zustand = rec.Zustand,
+        Condition = rec.Condition,
       });
     }
   }
 
   private void AddCard()      //Karte kommt in die Datenbank und in die Liste per onclick
   {
-    if (!string.IsNullOrWhiteSpace(sNewCard) && fNewPrice > 0 && fNewPrice != null && !string.IsNullOrWhiteSpace(sNeweditionnumber) && !string.IsNullOrWhiteSpace(sNewrarity) && !string.IsNullOrWhiteSpace(sNewzustand)) //In jedem Input muss was stehen
+    if (!string.IsNullOrWhiteSpace(sNewCard) && fNewPrice > 0 && fNewPrice != null && !string.IsNullOrWhiteSpace(sNewEditionNumber) && !string.IsNullOrWhiteSpace(sNewrarity) && !string.IsNullOrWhiteSpace(sNewCondition)) //In jedem Input muss was stehen
     {
       float tempNewPrice = fNewPrice.Value;
       string sNewPrice = tempNewPrice.ToString("0.00");
 
-      db.InsertRecord2(UserName, "CardsToSell",  new CardinfoItem {Verkäufer = UserName, CardName = sNewCard, Available = true, Price = sNewPrice, Editionnumber = sNeweditionnumber, Rarity = sNewrarity, Zustand = sNewzustand, });      //Eintrag in die DatenbankEN
+      db.InsertRecord2(UserName, "CardsToSell", new CardsellingItem { Seller = UserName, CardName = sNewCard, Available = true, Price = sNewPrice, EditionNumber = sNewEditionNumber, Rarity = sNewrarity, Condition = sNewCondition, });      //Eintrag in die DatenbankEN
 
-      Cardinfos.Add(new CardinfoItem
+      Cardsellings.Add(new CardsellingItem
       {
         CardName = sNewCard,
         Price = tempNewPrice.ToString("0.00"),
-        Editionnumber = sNeweditionnumber,
+        EditionNumber = sNewEditionNumber,
         Rarity = sNewrarity,
-        Zustand = sNewzustand
+        Condition = sNewCondition
       });
       sNewCard = string.Empty;
       fNewPrice = null;
-      sNeweditionnumber = string.Empty;
+      sNewEditionNumber = string.Empty;
       sNewrarity = string.Empty;
-      sNewzustand = string.Empty;
+      sNewCondition = string.Empty;
     }
 
-    NM.NavigateTo("Cardinfo", true);
+   NavManager.NavigateTo("Cardselling", true);
   }
 
   private void del(Guid nr)   //Karte wird aus der Datenbank entfernt per onklick
   {
-    var myRec = db.LoadRecordById<CardinfoItem>(UserName, new Guid(nr.ToByteArray()));
+    var myRec = db.LoadRecordById<CardsellingItem>(UserName, new Guid(nr.ToByteArray()));
 
-    db.DeleteRecordById<CardinfoItem>(UserName, myRec.Id);                                            //UserName Eintrag wird deleted
-    db.DeleteRecordById<CardinfoItem>("CardsToSell", myRec.Id);                                   //CardsToSell Eintrag wird deleted
+    db.DeleteRecordById<CardsellingItem>(UserName, myRec.Id);                                            //UserName Eintrag wird deleted
+    db.DeleteRecordById<CardsellingItem>("CardsToSell", myRec.Id);                                   //CardsToSell Eintrag wird deleted
 
-    NM.NavigateTo("Cardinfo", true);
+   NavManager.NavigateTo("Cardselling", true);
   }
 
-  private void edit(Guid nr,string Cardname,string Price,string editionnumber,string rarity,string zustand)   // Datenbankeintrag wird bearbeitet
+  private void edit(Guid nr, string CardName, string Price, string EditionNumber, string rarity, string condition)   // Datenbankeintrag wird bearbeitet
   {
-    var myRec = db.LoadRecordById<CardinfoItem>(UserName, new Guid(nr.ToByteArray()));
+    var myRec = db.LoadRecordById<CardsellingItem>(UserName, new Guid(nr.ToByteArray()));
 
-    db.UpdateRecordById<CardinfoItem>(UserName, nr, Cardname, Price, editionnumber, rarity, zustand);
+    db.UpdateRecordById<CardsellingItem>(UserName, nr, CardName, Price, EditionNumber, rarity, condition);
   }
-
-  }
+}
 
 
